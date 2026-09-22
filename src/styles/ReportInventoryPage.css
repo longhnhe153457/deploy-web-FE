@@ -1,0 +1,26 @@
+/* ReportInventoryPage.css */
+
+.report-container {
+  padding: 16px 24px;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.report-title {
+  margin: 0 !important;
+  font-weight: 800 !important;
+}
+
+.modal-title-bold {
+  font-weight: 800;
+  font-size: 16px;
+}

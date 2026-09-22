@@ -1,0 +1,104 @@
+.device-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #f0f2f5;
+}
+
+.device-header {
+  height: 60px;
+  background-color: #1f1f1f;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.device-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.device-icon {
+  font-size: 24px;
+  color: #E8442A;
+}
+
+.device-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.device-name {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.device-type {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.device-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.device-employee {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.employee-name {
+  font-weight: 500;
+  font-size: 16px;
+  color: #4CAF50;
+}
+
+.device-status {
+  font-style: italic;
+  color: #aaa;
+}
+
+.device-content {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.device-revoked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 20px;
+  background-color: #fff1f0;
+  color: #cf1322;
+}
+
+.device-revoked h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.device-revoked p {
+  font-size: 18px;
+}
+
+.device-revoked .hint {
+  margin-top: 40px;
+  font-size: 14px;
+  color: #999;
+}

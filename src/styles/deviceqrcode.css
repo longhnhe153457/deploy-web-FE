@@ -1,0 +1,36 @@
+.device-qr-container {
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid var(--primary-color, #ff4d4f);
+}
+
+.device-qr-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.device-qr-code {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 10px;
+}
+
+.device-qr-desc {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+}
+
+.device-qr-error {
+  color: #ff4d4f;
+  font-size: 12px;
+}

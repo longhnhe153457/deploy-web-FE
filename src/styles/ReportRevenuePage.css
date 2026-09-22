@@ -1,0 +1,54 @@
+/* ReportRevenuePage.css */
+
+.revenue-container {
+  padding: 16px 24px;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.revenue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.revenue-title {
+  margin: 0 !important;
+  font-weight: 800 !important;
+}
+
+.table-section {
+  background: #ffffff;
+  padding: 18px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.table-title {
+  margin: 0 !important;
+  font-weight: 700 !important;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 24px;
+}
+
+.modal-title-bold {
+  font-weight: 800;
+  font-size: 16px;
+}

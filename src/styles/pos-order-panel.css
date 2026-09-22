@@ -1,0 +1,112 @@
+/* Glassmorphism Panel */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+.glass-header {
+  background: rgba(240, 253, 244, 0.6) !important;
+  backdrop-filter: blur(8px);
+}
+
+.glass-summary {
+  background: rgba(248, 250, 252, 0.7) !important;
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,0.5) !important;
+}
+
+/* Tabs */
+.pos-order-content-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pos-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  margin: 12px 12px 0 12px;
+  border-radius: 8px;
+  gap: 4px;
+}
+
+.pos-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pos-tab:hover {
+  background: #e2e8f0;
+}
+
+.pos-tab.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.pos-tab-badge {
+  background: #ef4444;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Badges */
+.pos-cart-item-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.pos-action-btn--serve {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.pos-action-btn--serve:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.pos-action-btn--serve:active {
+  transform: translateY(1px);
+}
+
+.pos-cart-item--cancelled {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
