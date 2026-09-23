@@ -66,7 +66,7 @@ const DeviceLayout = () => {
 
     const hubUrl = import.meta.env.DEV
       ? 'http://localhost:5067/notificationHub'
-      : 'https://deploy-web-production.up.railway.app/notificationHub';
+      : 'https://deploy-web-wew0.onrender.com/notificationHub';
 
     const setupSignalR = async () => {
       const conn = new HubConnectionBuilder()
