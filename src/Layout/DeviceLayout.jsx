@@ -64,9 +64,9 @@ const DeviceLayout = () => {
 
     if (!tokenToUse || !deviceInfo?.isActive) return;
 
-    const hubUrl = import.meta.env.DEV
-      ? 'http://localhost:5067/notificationHub'
-      : 'deploy-web-production.up.railway.app';
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+      || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://deploy-web-production.up.railway.app');
+    const hubUrl = `${baseUrl}/notificationHub`;
 
     const setupSignalR = async () => {
       const conn = new HubConnectionBuilder()
