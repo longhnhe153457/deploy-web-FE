@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
-  || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://fulfilling-reverence-production-40fe.up.railway.app');
+  || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://deploy-web-production.up.railway.app');
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,

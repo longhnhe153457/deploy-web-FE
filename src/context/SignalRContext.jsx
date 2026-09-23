@@ -12,7 +12,7 @@ export const SignalRProvider = ({ children }) => {
     let isMounted = true;
     const hubUrl = import.meta.env.DEV
       ? 'http://localhost:5067/notificationHub'
-      : 'https://fulfilling-reverence-production-40fe.up.railway.app/notificationHub';
+      : 'https://deploy-web-production.up.railway.app/notificationHub';
 
     const connect = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl)
