@@ -12,7 +12,7 @@ export const SignalRProvider = ({ children }) => {
     let isMounted = true;
     const hubUrl = import.meta.env.DEV
       ? 'http://localhost:5067/notificationHub'
-      : 'https://deploy-web-wew0.onrender.com/notificationHub';
+      : 'https://deploy-web-qms0pg.fly.dev/notificationHub';
 
     const connect = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl)

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
-  || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://deploy-web-wew0.onrender.com');
+  || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://deploy-web-qms0pg.fly.dev');
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
