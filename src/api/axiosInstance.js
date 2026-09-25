@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const BASE_URL = import.meta.env.DEV
   ? 'http://localhost:5067'
-  : 'https://deploy-web-production-5fe8.up.railway.app';
+  : 'https://deploy-web-production.up.railway.app/';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
