@@ -52,7 +52,7 @@ const STATUS_TAGS = {
 };
 
 const ROLE_NAMES = {
-  'Admin': 'Quản trị viên',
+  'Admin': 'Chủ sở hữu',
   'Owner': 'Chủ sở hữu',
   'Manager': 'Quản lý',
   'Cashier': 'Thu ngân',
@@ -60,7 +60,7 @@ const ROLE_NAMES = {
   'HeadChef': 'Bếp trưởng',
   'Waiter': 'Phục vụ',
   'Staff': 'Phục vụ',
-  1: 'Quản trị viên',
+  1: 'Chủ sở hữu',
   2: 'Chủ sở hữu',
   3: 'Quản lý',
   4: 'Thu ngân',

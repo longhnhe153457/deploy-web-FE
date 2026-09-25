@@ -6,7 +6,6 @@ import {
   InputNumber,
   Input,
   DatePicker,
-  Radio,
   Button,
   Table,
   Tag,
@@ -64,25 +63,24 @@ const LeftoverPage = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [filterType, setFilterType] = useState(undefined);
-
-  const [form] = Form.useForm();
-  const type = Form.useWatch('type', form);
-  const selectedOrderId = Form.useWatch('orderId', form);
-  const selectedOrderDetailId = Form.useWatch('orderDetailId', form);
-  const selectedProductId = Form.useWatch('productId', form);
-  const isHandlingReuse = Form.useWatch('handlingAction', form) === true;
-  const returnReason = Form.useWatch('reason', form);
+  // Hai form độc lập: "Trả món" và "Bếp làm dư" không dùng chung dữ liệu nhập.
+  const [returnForm] = Form.useForm();
+  const [extraForm] = Form.useForm();
+  const selectedOrderId = Form.useWatch('orderId', returnForm);
+  const selectedOrderDetailId = Form.useWatch('orderDetailId', returnForm);
+  const selectedProductId = Form.useWatch('productId', returnForm);
+  const isHandlingReuse = Form.useWatch('handlingAction', returnForm) === true;
+  const returnReason = Form.useWatch('reason', returnForm);
   const productType = products.find((p) => p.id === selectedProductId)?.type;
 
   const maxReturnable = useMemo(() => {
-    if (type !== 'Return' || !selectedOrderDetailId) return undefined;
+    if (!selectedOrderDetailId) return undefined;
     for (const group of tableOrderOptions) {
       const item = group.items.find((i) => i.value === selectedOrderDetailId);
       if (item) return item.maxReturnable;
     }
     return undefined;
-  }, [type, selectedOrderDetailId, tableOrderOptions]);
+  }, [selectedOrderDetailId, tableOrderOptions]);
 
   const getReasonOptions = () => {
     if (!productType) return [];
@@ -106,7 +104,7 @@ const LeftoverPage = () => {
   };
 
   const handleHandlingChange = (checked) => {
-    form.setFieldsValue({
+    returnForm.setFieldsValue({
       handlingAction: checked,
     });
   };
@@ -139,14 +137,14 @@ const LeftoverPage = () => {
     if (!branchId) return;
     setLoading(true);
     try {
-      const res = await getLeftoverRecordsByBranch(branchId, filterType ? { type: filterType } : {});
+      const res = await getLeftoverRecordsByBranch(branchId);
       setRecords(res.data || []);
     } catch {
       message.error('Không thể tải danh sách món thừa.');
     } finally {
       setLoading(false);
     }
-  }, [branchId, filterType]);
+  }, [branchId]);
 
   useEffect(() => {
     fetchRecords();
@@ -204,54 +202,56 @@ const LeftoverPage = () => {
     return () => clearInterval(interval);
   }, [fetchOrderDetailOptions]);
 
-  const handleSubmit = async (values) => {
+  const handleSubmitReturn = async (values) => {
     if (!branchId) {
       message.error('Không xác định được chi nhánh hiện tại.');
       return;
     }
     setSaving(true);
     try {
-      if (values.type === 'Return') {
-        if (!values.orderDetailId) {
-          message.error('Vui lòng chọn chi tiết đơn hàng.');
-          setSaving(false);
-          return;
-        }
-        let finalReason = values.reason;
-        if (values.reason === 'Lý do khác') {
-          finalReason = values.otherReason;
-        }
-        const isReuse = values.handlingAction === true;
-        await requestReturnItem(values.orderDetailId, {
-          returnQuantity: values.quantity,
-          returnReason: finalReason,
-          // Backend chỉ cộng lại kho khi IsIntact && Reuse — phải gửi cả hai.
-          isIntact: isReuse,
-          handlingAction: isReuse ? 'Reuse' : 'Discard',
-          atFaultAccountId: values.atFaultAccountId ?? null,
-        });
-        message.success('Đã xử lý trả món và ghi nhận thành công');
-      } else {
-        await createLeftoverRecord({
-          branchId,
-          type: values.type,
-          productId: values.productId,
-          quantity: values.quantity,
-          reason: values.reason,
-          shiftId: values.shiftId ?? null,
-          recordDate: (values.recordDate || dayjs()).format('YYYY-MM-DD'),
-        });
-        message.success('Đã ghi nhận món dư thừa');
-      }
-
-      form.resetFields();
-      form.setFieldsValue({ type: values.type, recordDate: dayjs() });
+      const finalReason = values.reason === 'Lý do khác' ? values.otherReason : values.reason;
+      const isReuse = values.handlingAction === true;
+      await requestReturnItem(values.orderDetailId, {
+        returnQuantity: values.quantity,
+        returnReason: finalReason,
+        // Backend chỉ cộng lại kho khi IsIntact && Reuse — phải gửi cả hai.
+        isIntact: isReuse,
+        handlingAction: isReuse ? 'Reuse' : 'Discard',
+        atFaultAccountId: values.atFaultAccountId ?? null,
+      });
+      message.success('Đã xử lý trả món và ghi nhận thành công');
+      returnForm.resetFields();
       fetchRecords();
-      if (values.type === 'Return') {
-        fetchOrderDetailOptions(); // Cập nhật lại dropdown Bàn/Món để ẩn món vừa trả
-      }
+      fetchOrderDetailOptions(); // Cập nhật lại dropdown Bàn/Món để ẩn món vừa trả
     } catch (err) {
-      message.error(err?.response?.data?.message || 'Lỗi khi ghi nhận món thừa.');
+      message.error(err?.response?.data?.message || 'Lỗi khi ghi nhận trả món.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSubmitExtra = async (values) => {
+    if (!branchId) {
+      message.error('Không xác định được chi nhánh hiện tại.');
+      return;
+    }
+    setSaving(true);
+    try {
+      await createLeftoverRecord({
+        branchId,
+        type: 'Extra',
+        productId: values.productId,
+        quantity: values.quantity,
+        reason: values.reason,
+        shiftId: values.shiftId ?? null,
+        recordDate: (values.recordDate || dayjs()).format('YYYY-MM-DD'),
+      });
+      message.success('Đã ghi nhận món dư thừa');
+      extraForm.resetFields();
+      extraForm.setFieldsValue({ recordDate: dayjs() });
+      fetchRecords();
+    } catch (err) {
+      message.error(err?.response?.data?.message || 'Lỗi khi ghi nhận bếp làm dư.');
     } finally {
       setSaving(false);
     }
@@ -267,45 +267,51 @@ const LeftoverPage = () => {
     }
   };
 
-  const columns = [
-    {
-      title: 'Loại',
-      dataIndex: 'type',
-      key: 'type',
-      render: (t) => (t === 'Return' ? <Tag color="volcano">Khách trả món</Tag> : <Tag color="orange">Bếp làm dư</Tag>),
-    },
+  const returnRecords = useMemo(() => records.filter((r) => r.type === 'Return'), [records]);
+  const extraRecords = useMemo(() => records.filter((r) => r.type === 'Extra'), [records]);
+
+  const actionsColumn = {
+    title: '',
+    key: 'actions',
+    width: 50,
+    render: (_, r) => (
+      <Popconfirm title="Xóa bản ghi này?" onConfirm={() => handleDelete(r.id)} okText="Đồng ý" cancelText="Hủy">
+        <Button type="text" danger icon={<DeleteOutlined />} />
+      </Popconfirm>
+    ),
+  };
+
+  const returnColumns = [
     { title: 'Món', dataIndex: 'productName', key: 'productName' },
     { title: 'SL', dataIndex: 'quantity', key: 'quantity', width: 60 },
     { title: 'Lý do', dataIndex: 'reason', key: 'reason' },
     {
       title: 'Bàn / Xử lý',
       key: 'detail',
-      render: (_, r) =>
-        r.type === 'Return' ? (
-          <Space direction="vertical" size={0}>
-            {r.tableName && <span>Bàn: {r.tableName}</span>}
-            {r.handlingAction && <Tag>{HANDLING_ACTION_LABELS[r.handlingAction] || (r.handlingAction === 'Reuse' ? 'Tái sử dụng' : 'Huỷ')}</Tag>}
-            {r.atFaultAccountName && (
-              <span style={{ color: '#cf1322', fontSize: 12 }}>Bếp làm sai: {r.atFaultAccountName}</span>
-            )}
-            {r.usedAt && <Tag color="blue">Đã dùng lại</Tag>}
-          </Space>
-        ) : (
-          <span>{r.shiftName || '—'}</span>
-        ),
+      render: (_, r) => (
+        <Space direction="vertical" size={0}>
+          {r.tableName && <span>Bàn: {r.tableName}</span>}
+          {r.handlingAction && <Tag>{HANDLING_ACTION_LABELS[r.handlingAction] || (r.handlingAction === 'Reuse' ? 'Tái sử dụng' : 'Huỷ')}</Tag>}
+          {r.atFaultAccountName && (
+            <span style={{ color: '#cf1322', fontSize: 12 }}>Bếp làm sai: {r.atFaultAccountName}</span>
+          )}
+          {r.usedAt && <Tag color="blue">Đã dùng lại</Tag>}
+        </Space>
+      ),
     },
     { title: 'Ngày', dataIndex: 'recordDate', key: 'recordDate' },
     { title: 'Người ghi', dataIndex: 'createdByName', key: 'createdByName' },
-    {
-      title: '',
-      key: 'actions',
-      width: 50,
-      render: (_, r) => (
-        <Popconfirm title="Xóa bản ghi này?" onConfirm={() => handleDelete(r.id)} okText="Đồng ý" cancelText="Hủy">
-          <Button type="text" danger icon={<DeleteOutlined />} />
-        </Popconfirm>
-      ),
-    },
+    actionsColumn,
+  ];
+
+  const extraColumns = [
+    { title: 'Món', dataIndex: 'productName', key: 'productName' },
+    { title: 'SL', dataIndex: 'quantity', key: 'quantity', width: 60 },
+    { title: 'Lý do', dataIndex: 'reason', key: 'reason' },
+    { title: 'Ca làm việc', dataIndex: 'shiftName', key: 'shiftName', render: (v) => v || '—' },
+    { title: 'Ngày', dataIndex: 'recordDate', key: 'recordDate' },
+    { title: 'Người ghi', dataIndex: 'createdByName', key: 'createdByName' },
+    actionsColumn,
   ];
 
   const cancelledColumns = [
@@ -339,156 +345,116 @@ const LeftoverPage = () => {
 
   const orderDetailOptionsForOrder = tableOrderOptions.find((t) => t.orderId === selectedOrderId)?.items || [];
 
-  const leftoverTab = (
+  const returnTab = (
     <>
       {canCreate && (
-        <Card title="Ghi nhận món thừa" style={{ marginBottom: 20, borderRadius: 12 }}>
+        <Card title="Ghi nhận trả món" style={{ marginBottom: 20, borderRadius: 12 }}>
           <Form
-            form={form}
+            form={returnForm}
             layout="vertical"
-            onFinish={handleSubmit}
-            initialValues={{ type: 'Return', recordDate: dayjs() }}
+            onFinish={handleSubmitReturn}
+            initialValues={{ recordDate: dayjs() }}
           >
-            <Form.Item name="type" label="Loại" rules={[{ required: true }]}>
-              <Radio.Group onChange={(e) => {
-                if (e.target.value === 'Return') {
-                  form.setFieldsValue({ handlingAction: true, reason: undefined, otherReason: undefined });
-                } else {
-                  form.setFieldsValue({ handlingAction: undefined, reason: undefined, otherReason: undefined });
-                }
-              }}>
-                <Radio.Button value="Return">Khách trả món (Return)</Radio.Button>
-                <Radio.Button value="Extra">Bếp làm dư (Extra)</Radio.Button>
-              </Radio.Group>
-            </Form.Item>
-
             <Space style={{ display: 'flex' }} size="large" align="start" wrap>
-              {type === 'Return' && (
-                <Form.Item 
-                  name="orderId" 
-                  label={
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: 220 }}>
-                      <span>Đơn hàng / Bàn</span>
-                      <SyncOutlined 
-                        style={{ cursor: 'pointer', color: '#1890ff' }} 
-                        onClick={() => fetchOrderDetailOptions()} 
-                        title="Làm mới danh sách bàn"
-                      />
-                    </div>
-                  } 
-                  rules={[{ required: true, message: 'Chọn đơn hàng' }]} 
-                  style={{ width: 220 }}
-                >
-                  <Select
-                    showSearch
-                    placeholder="Chọn bàn/đơn"
-                    optionFilterProp="label"
-                    options={tableOrderOptions.map((t) => ({ value: t.orderId, label: t.tableName }))}
-                    onChange={() => {
-                      form.setFieldsValue({ orderDetailId: undefined, productId: undefined, quantity: undefined });
-                    }}
-                  />
-                </Form.Item>
-              )}
-
-              {type === 'Return' && (
-                <Form.Item name="orderDetailId" label="Món trong đơn hàng" rules={[{ required: true, message: 'Chọn món khách trả trong đơn' }]} style={{ width: 320 }}>
-                  <Select
-                    showSearch
-                    disabled={!selectedOrderId}
-                    placeholder={selectedOrderId ? 'Chọn món' : 'Chọn bàn/đơn trước'}
-                    optionFilterProp="label"
-                    options={orderDetailOptionsForOrder}
-                  onChange={(value, option) => {
-                      if (option) {
-                        form.setFieldsValue({ productId: option.productId, quantity: 1 });
-                      }
-                    }}
-                  />
-                </Form.Item>
-              )}
-
-              <Form.Item name="productId" label="Món" hidden={type === 'Return'} rules={[{ required: true, message: 'Chọn món' }]} style={{ width: 260 }}>
+              <Form.Item
+                name="orderId"
+                label={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: 220 }}>
+                    <span>Đơn hàng / Bàn</span>
+                    <SyncOutlined
+                      style={{ cursor: 'pointer', color: '#1890ff' }}
+                      onClick={() => fetchOrderDetailOptions()}
+                      title="Làm mới danh sách bàn"
+                    />
+                  </div>
+                }
+                rules={[{ required: true, message: 'Chọn đơn hàng' }]}
+                style={{ width: 220 }}
+              >
                 <Select
                   showSearch
-                  placeholder="Chọn món"
+                  placeholder="Chọn bàn/đơn"
                   optionFilterProp="label"
-                  options={products.map((p) => ({ value: p.id, label: p.name }))}
+                  options={tableOrderOptions.map((t) => ({ value: t.orderId, label: t.tableName }))}
+                  onChange={() => {
+                    returnForm.setFieldsValue({ orderDetailId: undefined, productId: undefined, quantity: undefined });
+                  }}
                 />
               </Form.Item>
 
-              <Form.Item 
-                name="quantity" 
-                label="Số lượng" 
-                rules={[
-                  { required: true, message: 'Nhập số lượng' },
-                  type === 'Return' && maxReturnable !== undefined 
-                    ? { type: 'number', max: maxReturnable, message: `Tối đa ${maxReturnable}` } 
-                    : {}
-                ]} 
-                style={{ width: 120 }}
-              >
-                <InputNumber min={1} max={type === 'Return' ? maxReturnable : undefined} style={{ width: '100%' }} />
+              <Form.Item name="orderDetailId" label="Món trong đơn hàng" rules={[{ required: true, message: 'Chọn món khách trả trong đơn' }]} style={{ width: 320 }}>
+                <Select
+                  showSearch
+                  disabled={!selectedOrderId}
+                  placeholder={selectedOrderId ? 'Chọn món' : 'Chọn bàn/đơn trước'}
+                  optionFilterProp="label"
+                  options={orderDetailOptionsForOrder}
+                  onChange={(value, option) => {
+                    if (option) {
+                      returnForm.setFieldsValue({ productId: option.productId, quantity: 1 });
+                    }
+                  }}
+                />
               </Form.Item>
 
-              {type === 'Extra' && (
-                <Form.Item name="shiftId" label="Ca làm việc" style={{ width: 200 }}>
-                  <Select allowClear placeholder="Chọn ca" options={shifts.map((s) => ({ value: s.id, label: s.name }))} />
-                </Form.Item>
-              )}
+              {/* Món được điền tự động theo "Món trong đơn hàng", chỉ giữ giá trị để xác định loại món */}
+              <Form.Item name="productId" hidden>
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                name="quantity"
+                label="Số lượng"
+                rules={[
+                  { required: true, message: 'Nhập số lượng' },
+                  ...(maxReturnable !== undefined
+                    ? [{ type: 'number', max: maxReturnable, message: `Tối đa ${maxReturnable}` }]
+                    : []),
+                ]}
+                style={{ width: 120 }}
+              >
+                <InputNumber min={1} max={maxReturnable} style={{ width: '100%' }} />
+              </Form.Item>
 
               <Form.Item name="recordDate" label="Ngày" style={{ width: 160 }}>
                 <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
               </Form.Item>
             </Space>
 
-            {type === 'Return' && (
-              <Space style={{ display: 'flex' }} size="large" align="start" wrap>
-                <Form.Item name="handlingAction" valuePropName="checked" label="Hướng xử lý" style={{ width: 220 }}>
-                  <Switch
-                    checkedChildren="Tái sử dụng"
-                    unCheckedChildren="Huỷ bỏ"
-                    onChange={handleHandlingChange}
-                  />
-                  <div style={{ marginTop: 8, fontSize: 12, color: '#888' }}>
-                    Hàng tái sử dụng sẽ được cộng lại vào kho nếu là mặt hàng Thường.
-                  </div>
-                </Form.Item>
-                {productType !== 'Regular' && productType !== 'Manufactured' && (
-                  <Form.Item name="atFaultAccountId" label="Bếp làm sai (nếu có)" style={{ width: 220 }}>
-                    <Select
-                      allowClear
-                      showSearch
-                      placeholder="Chọn tài khoản bếp"
-                      optionFilterProp="label"
-                      options={chefAccounts.map((a) => ({ value: a.id, label: a.name }))}
-                    />
-                  </Form.Item>
-                )}
-              </Space>
-            )}
-
-            {type === 'Return' ? (
-              <>
-                <Form.Item name="reason" label="Lý do" rules={[{ required: true, message: 'Chọn lý do' }]}>
-                  <Select 
-                    disabled={!selectedProductId}
-                    placeholder={selectedProductId ? "Chọn lý do trả món..." : "Vui lòng chọn món trước"} 
-                    options={getReasonOptions()} 
-                  />
-                </Form.Item>
-                {returnReason === 'Lý do khác' && (
-                  <Form.Item name="otherReason" rules={[{ required: true, message: 'Nhập chi tiết lý do' }]}>
-                    <Input.TextArea rows={2} placeholder="Vui lòng nhập chi tiết lý do..." />
-                  </Form.Item>
-                )}
-              </>
-            ) : (
-              <Form.Item name="reason" label="Lý do" rules={[{ required: true, message: 'Nhập lý do' }]}>
-                <Input.TextArea
-                  rows={2}
-                  placeholder="VD: làm dư, ước tính sai..."
+            <Space style={{ display: 'flex' }} size="large" align="start" wrap>
+              <Form.Item name="handlingAction" valuePropName="checked" label="Hướng xử lý" style={{ width: 220 }}>
+                <Switch
+                  checkedChildren="Tái sử dụng"
+                  unCheckedChildren="Không sử dụng"
+                  onChange={handleHandlingChange}
                 />
+                <div style={{ marginTop: 8, fontSize: 12, color: '#888' }}>
+                  Hàng tái sử dụng sẽ được cộng lại vào kho nếu là mặt hàng Thường.
+                </div>
+              </Form.Item>
+              {productType !== 'Regular' && productType !== 'Manufactured' && (
+                <Form.Item name="atFaultAccountId" label="Bếp làm sai (nếu có)" style={{ width: 220 }}>
+                  <Select
+                    allowClear
+                    showSearch
+                    placeholder="Chọn tài khoản bếp"
+                    optionFilterProp="label"
+                    options={chefAccounts.map((a) => ({ value: a.id, label: a.name }))}
+                  />
+                </Form.Item>
+              )}
+            </Space>
+
+            <Form.Item name="reason" label="Lý do" rules={[{ required: true, message: 'Chọn lý do' }]}>
+              <Select
+                disabled={!selectedProductId}
+                placeholder={selectedProductId ? 'Chọn lý do trả món...' : 'Vui lòng chọn món trước'}
+                options={getReasonOptions()}
+              />
+            </Form.Item>
+            {returnReason === 'Lý do khác' && (
+              <Form.Item name="otherReason" rules={[{ required: true, message: 'Nhập chi tiết lý do' }]}>
+                <Input.TextArea rows={2} placeholder="Vui lòng nhập chi tiết lý do..." />
               </Form.Item>
             )}
 
@@ -501,27 +467,69 @@ const LeftoverPage = () => {
         </Card>
       )}
 
-      <Card
-        title="Lịch sử món thừa"
-        style={{ borderRadius: 12 }}
-        extra={
-          <Select
-            allowClear
-            placeholder="Lọc theo loại"
-            style={{ width: 180 }}
-            value={filterType}
-            onChange={setFilterType}
-            options={[
-              { value: 'Return', label: 'Khách trả món' },
-              { value: 'Extra', label: 'Bếp làm dư' },
-            ]}
-          />
-        }
-      >
+      <Card title="Lịch sử trả món" style={{ borderRadius: 12 }}>
         <Table
           rowKey="id"
-          columns={columns}
-          dataSource={records}
+          columns={returnColumns}
+          dataSource={returnRecords}
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+        />
+      </Card>
+    </>
+  );
+
+  const extraTab = (
+    <>
+      {canCreate && (
+        <Card title="Ghi nhận bếp làm dư" style={{ marginBottom: 20, borderRadius: 12 }}>
+          <Form
+            form={extraForm}
+            layout="vertical"
+            onFinish={handleSubmitExtra}
+            initialValues={{ recordDate: dayjs() }}
+          >
+            <Space style={{ display: 'flex' }} size="large" align="start" wrap>
+              <Form.Item name="productId" label="Món" rules={[{ required: true, message: 'Chọn món' }]} style={{ width: 260 }}>
+                <Select
+                  showSearch
+                  placeholder="Chọn món"
+                  optionFilterProp="label"
+                  options={products.map((p) => ({ value: p.id, label: p.name }))}
+                />
+              </Form.Item>
+
+              <Form.Item name="quantity" label="Số lượng" rules={[{ required: true, message: 'Nhập số lượng' }]} style={{ width: 120 }}>
+                <InputNumber min={1} style={{ width: '100%' }} />
+              </Form.Item>
+
+              <Form.Item name="shiftId" label="Ca làm việc" style={{ width: 200 }}>
+                <Select allowClear placeholder="Chọn ca" options={shifts.map((s) => ({ value: s.id, label: s.name }))} />
+              </Form.Item>
+
+              <Form.Item name="recordDate" label="Ngày" style={{ width: 160 }}>
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+              </Form.Item>
+            </Space>
+
+            <Form.Item name="reason" label="Lý do" rules={[{ required: true, message: 'Nhập lý do' }]}>
+              <Input.TextArea rows={2} placeholder="VD: làm dư, ước tính sai..." />
+            </Form.Item>
+
+            <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+              <Button type="primary" icon={<PlusOutlined />} htmlType="submit" loading={saving}>
+                Ghi nhận
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
+      )}
+
+      <Card title="Lịch sử bếp làm dư" style={{ borderRadius: 12 }}>
+        <Table
+          rowKey="id"
+          columns={extraColumns}
+          dataSource={extraRecords}
           loading={loading}
           pagination={{ pageSize: 10 }}
         />
@@ -570,9 +578,10 @@ const LeftoverPage = () => {
       </div>
 
       <Tabs
-        defaultActiveKey="leftover"
+        defaultActiveKey="return"
         items={[
-          { key: 'leftover', label: 'Món thừa', children: leftoverTab },
+          { key: 'return', label: 'Trả món', children: returnTab },
+          { key: 'extra', label: 'Bếp làm dư', children: extraTab },
           { key: 'cancelled', label: 'Lịch sử hủy món', children: cancelledHistoryTab },
         ]}
       />

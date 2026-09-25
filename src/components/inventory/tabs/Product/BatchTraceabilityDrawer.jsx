@@ -646,7 +646,7 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
                                 {renderAllocationTypeBadge(a)}
                               </td>
                               <td style={{ padding: '8px 10px', fontWeight: 600, color: '#2563eb' }}>
-                                {a.documentCode || '---'}
+                                {a.documentCode ? <a href={`/inventory-management?tab=Invoice&search=${a.documentCode}`} target="_blank">{a.documentCode}</a> : '---'}
                               </td>
                               <td
                                 style={{

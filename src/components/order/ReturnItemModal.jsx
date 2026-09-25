@@ -139,7 +139,7 @@ const ReturnItemModal = ({ visible, item, onCancel, onSuccess, isCustomerMode = 
         <Form.Item name="handlingAction" valuePropName="checked" label="Hướng xử lý">
           <Switch
             checkedChildren="Tái sử dụng"
-            unCheckedChildren="Huỷ bỏ"
+            unCheckedChildren="Không sử dụng"
             onChange={handleHandlingChange}
           />
           <div style={{ marginTop: 8, fontSize: 12, color: '#888' }}>

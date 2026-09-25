@@ -20,7 +20,7 @@ const { Title, Text } = Typography;
 
 const ROLES_MAP = {
   1: { label: 'Chủ hệ thống', color: 'gold' },
-  2: { label: 'Quản trị viên', color: 'red' },
+  2: { label: 'Chủ sở hữu', color: 'red' },
   3: { label: 'Quản lý', color: 'purple' },
   4: { label: 'Thu ngân', color: 'blue' },
   5: { label: 'Bếp trưởng', color: 'orange' },

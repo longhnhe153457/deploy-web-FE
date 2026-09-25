@@ -31,6 +31,7 @@ import {
   SyncOutlined,
   MessageOutlined,
   HistoryOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import ShiftFeedbackModal from '../components/workSchedule/ShiftFeedbackModal';
 import dayjs from 'dayjs';
@@ -243,6 +244,57 @@ const MyWorkSchedulePage = () => {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  };
+
+  const handleCheckOutClick = (item) => {
+    const shiftInfo = getShiftDetails(item.shiftId);
+    const workDateStr = dayjs(item.workDate).format('YYYY-MM-DD');
+    const startStr = shiftInfo.startTime ? shiftInfo.startTime.substring(0, 5) : '00:00';
+    const endStr = shiftInfo.endTime ? shiftInfo.endTime.substring(0, 5) : '23:59';
+
+    let shiftEnd = dayjs(`${workDateStr} ${endStr}`);
+    if (shiftInfo.endTime && shiftInfo.startTime && shiftInfo.endTime < shiftInfo.startTime) {
+      shiftEnd = shiftEnd.add(1, 'day');
+    }
+
+    const now = dayjs();
+    const isEarly = now.isBefore(shiftEnd);
+
+    if (isEarly) {
+      const diffMinutes = shiftEnd.diff(now, 'minute');
+      const hoursLeft = Math.floor(diffMinutes / 60);
+      const minsLeft = diffMinutes % 60;
+      const timeLeftStr = hoursLeft > 0 
+        ? `${hoursLeft} giờ ${minsLeft} phút` 
+        : `${minsLeft} phút`;
+
+      Modal.confirm({
+        title: '⚠️ Xác nhận Check-out sớm',
+        icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+        content: (
+          <div style={{ paddingTop: '8px', fontSize: '14px' }}>
+            <p style={{ marginBottom: '8px' }}>
+              Ca làm việc <strong>{shiftInfo.name}</strong> ({startStr} - {endStr}) chưa kết thúc.
+            </p>
+            <p style={{ marginBottom: '8px', color: '#d97706' }}>
+              ⏱ Thời gian ca làm còn lại: <strong>{timeLeftStr}</strong> (kết thúc lúc {endStr}).
+            </p>
+            <p style={{ margin: 0, fontWeight: '500' }}>
+              Bạn có chắc chắn muốn điểm danh <strong>Check-out sớm</strong> không?
+            </p>
+          </div>
+        ),
+        okText: 'Xác nhận Check-out',
+        okButtonProps: { danger: true, size: 'large' },
+        cancelText: 'Hủy',
+        cancelButtonProps: { size: 'large' },
+        onOk() {
+          doCheckInWithShift(item.branchId, item.id);
+        },
+      });
+    } else {
+      doCheckInWithShift(item.branchId, item.id);
+    }
   };
 
   const handleCheckIn = () => {
@@ -1623,7 +1675,7 @@ const MyWorkSchedulePage = () => {
                   danger
                   size="large"
                   loading={checkinLoading}
-                  onClick={() => doCheckInWithShift(item.branchId, item.id)}
+                  onClick={() => handleCheckOutClick(item)}
                 >
                   Check-out
                 </Button>

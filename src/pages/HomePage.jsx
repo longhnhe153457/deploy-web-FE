@@ -311,11 +311,11 @@ const HomePage = () => {
 
       const [statsRes, invoicesRes, cashFlowsRes, schedulesRes, accountsRes, allOrdersRes] = await Promise.allSettled([
         getBranchDashboardStats(range, formattedStart, formattedEnd, currentBranchId),
-        getPaidInvoices(currentBranchId),
-        getCashFlows(currentBranchId),
+        getPaidInvoices(currentBranchId, formattedStart, formattedEnd),
+        getCashFlows(currentBranchId, formattedStart, formattedEnd),
         getAllWorkSchedules(),
         getRoleRange(),
-        getAllOrders(currentBranchId),
+        getAllOrders(currentBranchId, formattedStart, formattedEnd),
       ]);
 
       const beStats = statsRes.status === "fulfilled" ? statsRes.value?.data : null;

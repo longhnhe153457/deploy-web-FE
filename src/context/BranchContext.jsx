@@ -41,9 +41,11 @@ export const BranchProvider = ({ children }) => {
         setCurrentBranchId(null); // 'Tất cả chi nhánh'
       }
     } else {
-      // Manager / Cashier / Waiter / Chef — chi nhánh cố định theo hợp đồng,
-      // không có quyền tự chọn chi nhánh khác.
-      if (user?.branchIds?.length > 0) {
+      // Manager / Cashier / Waiter / Chef — chi nhánh cố định theo hợp đồng
+      const shiftBranch = localStorage.getItem('activeShiftBranchId');
+      if (shiftBranch) {
+        setCurrentBranchId(parseInt(shiftBranch, 10));
+      } else if (user?.branchIds?.length > 0) {
         setCurrentBranchId(user.branchIds[0]);
       } else {
         setCurrentBranchId(null);
@@ -80,8 +82,12 @@ export const BranchProvider = ({ children }) => {
   const currentBranch = branches.find(b => b.id === currentBranchId);
   const isBranchInactive = currentBranch ? currentBranch.status === 'Ngừng kinh doanh' : false;
 
+  const updateCurrentBranchFromShift = (branchId) => {
+    setCurrentBranchId(branchId);
+  };
+
   return (
-    <BranchContext.Provider value={{ currentBranchId, selectBranch, branches, isBranchInactive }}>
+    <BranchContext.Provider value={{ currentBranchId, selectBranch, updateCurrentBranchFromShift, branches, isBranchInactive }}>
       {children}
     </BranchContext.Provider>
   );

@@ -55,12 +55,8 @@ const OrderPage = ({ isWaiterMode }) => {
     setTableLoading(true);
     try {
       let res;
-      const shiftBranchId = localStorage.getItem('activeShiftBranchId');
-
       if (deviceInfo) {
         res = await getTablesByBranch(deviceInfo.branchId);
-      } else if (shiftBranchId) {
-        res = await getTablesByBranch(shiftBranchId);
       } else if (currentBranchId) {
         res = await getTablesByBranch(currentBranchId);
       } else {
@@ -528,7 +524,7 @@ const OrderPage = ({ isWaiterMode }) => {
         <MenuPanel
           canOrder={canOrder}
           onAddItem={handleAddItem}
-          branchId={deviceInfo?.branchId || localStorage.getItem('activeShiftBranchId') || (user?.branchIds && user.branchIds[0]) || 1}
+          branchId={deviceInfo?.branchId || currentBranchId || (user?.branchIds && user.branchIds[0]) || 1}
           showReuseSuggestions={false}
           refreshTrigger={refreshMenuTrigger}
         />
@@ -556,7 +552,7 @@ const OrderPage = ({ isWaiterMode }) => {
 
       <PaymentModal
         visible={isPaymentModalVisible}
-        branchId={selectedTable?.branchId || selectedTable?.area?.branchId || deviceInfo?.branchId || localStorage.getItem('activeShiftBranchId') || user?.branchId || (user?.branchIds && user.branchIds[0])}
+        branchId={selectedTable?.branchId || selectedTable?.area?.branchId || deviceInfo?.branchId || currentBranchId || user?.branchId || (user?.branchIds && user.branchIds[0])}
         orderId={orderSummary?.activeOrderId}
         tableName={orderSummary?.tableName || selectedTable?.name}
         items={orderSummary?.items}
@@ -592,13 +588,13 @@ const OrderPage = ({ isWaiterMode }) => {
       <RequestRestockModal 
         visible={isRestockModalVisible} 
         onClose={() => setIsRestockModalVisible(false)} 
-        branchId={deviceInfo?.branchId || localStorage.getItem('activeShiftBranchId') || user?.branchIds?.[0]}
+        branchId={deviceInfo?.branchId || currentBranchId || user?.branchIds?.[0]}
       />
 
       <InternalPickupModal 
         visible={isInternalPickupModalVisible} 
         onClose={() => setIsInternalPickupModalVisible(false)} 
-        branchId={deviceInfo?.branchId || localStorage.getItem('activeShiftBranchId') || user?.branchIds?.[0]}
+        branchId={deviceInfo?.branchId || currentBranchId || user?.branchIds?.[0]}
       />
     </div>
   );

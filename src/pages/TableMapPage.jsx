@@ -58,20 +58,6 @@ const TableMapPage = ({ isPosHub, isWaiterMode, isDeviceMode }) => {
           return;
         }
 
-        const shiftBranchId = localStorage.getItem('activeShiftBranchId');
-        if (shiftBranchId) {
-          const shiftBranch = allBranches.find(b => b.id.toString() === shiftBranchId);
-          if (shiftBranch) {
-            setBranches([shiftBranch]);
-            setSelectedBranch(shiftBranch.id);
-          } else {
-            setBranches([]);
-            setSelectedBranch(null);
-          }
-          setIsBranchesLoaded(true);
-          return;
-        }
-
         let availableBranches = allBranches;
         const isAdminOrOwner = user?.roles?.includes('Admin') || user?.roles?.includes('Owner') || 
                                user?.role === 'Admin' || user?.role === 'Owner' || 
@@ -82,7 +68,7 @@ const TableMapPage = ({ isPosHub, isWaiterMode, isDeviceMode }) => {
         }
 
         setBranches(availableBranches);
-        if (isPosHub && currentBranchId) {
+        if (currentBranchId) {
           setSelectedBranch(currentBranchId);
         } else if (availableBranches.length > 0) {
           setSelectedBranch(availableBranches[0].id);

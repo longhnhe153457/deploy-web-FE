@@ -1,14 +1,15 @@
 import axios from 'axios';
 
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
-  || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://deploy-web-production.up.railway.app');
+const BASE_URL = import.meta.env.DEV
+  ? 'http://localhost:5067'
+  : 'https://deploy-web-production.up.railway.app';
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 120000,
+  timeout: 150000,
 });
 
 // ─── Request Interceptor ───────────────────────────────────────────────────

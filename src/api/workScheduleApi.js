@@ -45,4 +45,5 @@ export const autoAssignWorkSchedules = (data) =>
 export const getActivityLog = (id) =>
   axiosInstance.get(`/api/WorkSchedule/${id}/activity-log`);
 
-
+export const getCurrentShiftSession = () =>
+  axiosInstance.get('/api/WorkSchedule/current-session');

@@ -57,7 +57,7 @@ const KitchenSessionPage = () => {
           message={
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>
-                <strong> Phiên Bếp Cá Nhân (Mobile/Web)</strong> | Nhân viên: {user?.name} | Ca: {shiftInfo.name} ({shiftInfo.time}) | Ngắt kết nối lúc: {shiftInfo.disconnectTime.format('HH:mm')}
+                <strong> Phiên Bếp Cá Nhân (Mobile/Web)</strong> | Nhân viên: {user?.name} | Ca: {shiftInfo.name} ({shiftInfo.time})
               </span>
               <Button size="small" icon={<ReloadOutlined />} onClick={handleRefresh}>
                 Làm mới

@@ -82,7 +82,7 @@ const WaiterMobileSessionPage = () => {
           message={
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>
-                <strong> Phiên Phục Vụ Cá Nhân (Mobile)</strong> | Nhân viên: {user?.name} | Ca: {shiftInfo.name} ({shiftInfo.time}) | Ngắt kết nối lúc: {shiftInfo.disconnectTime.format('HH:mm')}
+                <strong> Phiên Phục Vụ Cá Nhân (Mobile)</strong> | Nhân viên: {user?.name} | Ca: {shiftInfo.name} ({shiftInfo.time})
               </span>
               <Button size="small" icon={<ReloadOutlined />} onClick={() => setRefreshKey(prev => prev + 1)}>
                 Làm mới

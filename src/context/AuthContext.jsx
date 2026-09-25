@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }) => {
           // Token không hợp lệ → đăng xuất
           localStorage.removeItem('access_token');
           localStorage.removeItem('user');
+          localStorage.removeItem('activeShiftBranchId');
           setToken(null);
           setUser(null);
         }
@@ -74,6 +75,7 @@ export const AuthProvider = ({ children }) => {
   const setAuth = (newToken, userData) => {
     localStorage.setItem('access_token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.removeItem('activeShiftBranchId');
     setToken(newToken);
     setUser(userData);
   };

@@ -11,11 +11,13 @@ const validateBranchId = (branchId) => {
 /**
  * Lấy danh sách phiếu thu chi của chi nhánh (hoặc tất cả chi nhánh nếu branchId rỗng).
  */
-export const getCashFlows = async (branchId) => {
+export const getCashFlows = async (branchId, startDate = null, endDate = null) => {
   const params = {};
   if (branchId && branchId > 0) {
     params.branchId = branchId;
   }
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
   const response = await axiosInstance.get('/api/CashFlow', { params });
   return Array.isArray(response.data) ? response.data : [];
 };

@@ -1919,7 +1919,7 @@ const PayrollPage = () => {
             Đóng
           </Button>,
         ]}
-        width={720}
+        width={900}
       >
         {detailLoading ? (
           <div style={{ textAlign: 'center', padding: '30px 0' }}>Đang tải chi tiết...</div>
@@ -1968,7 +1968,7 @@ const PayrollPage = () => {
                   if (st === 'ABSENT' || st === 'CANCELLED' || st === 'VẮNG MẶT' || st === 'ĐÃ HỦY') return false;
                 }
                 return (s.actualHours ?? s.regularHours ?? s.actualWorkHours ?? 0) > 0 || s.isNightShift || (s.approvedOTHours && s.approvedOTHours > 0);
-              });
+              }).sort((a, b) => dayjs(a.workDate).valueOf() - dayjs(b.workDate).valueOf());
 
               if (completedShifts.length === 0) return null;
 
@@ -2031,19 +2031,22 @@ const PayrollPage = () => {
                       pagination={{ pageSize: 5 }}
                       size="small"
                       bordered
+                      scroll={{ x: 750 }}
                       columns={[
                         {
                           title: 'Ngày làm',
                           dataIndex: 'workDate',
                           key: 'workDate',
-                          width: 105,
+                          width: 110,
+                          sorter: (a, b) => dayjs(a.workDate).valueOf() - dayjs(b.workDate).valueOf(),
+                          defaultSortOrder: 'ascend',
                           render: (d) => dayjs(d).format('DD/MM/YYYY'),
                         },
                         {
                           title: 'Số giờ làm',
                           key: 'hours',
                           align: 'center',
-                          width: 90,
+                          width: 95,
                           render: (_, r) => (
                             <span>{r.actualHours ?? r.regularHours ?? 0}h{r.standardHours ? `/${r.standardHours}h` : ''}</span>
                           ),
@@ -2053,7 +2056,7 @@ const PayrollPage = () => {
                           dataIndex: 'dateCoefficient',
                           key: 'dateCoefficient',
                           align: 'center',
-                          width: 90,
+                          width: 95,
                           render: (coeff, r) => {
                             const val = coeff ?? r.dateMultiplier ?? 1.0;
                             return <Tag color={val > 1.0 ? 'volcano' : 'default'}>{val}x</Tag>;
@@ -2064,7 +2067,7 @@ const PayrollPage = () => {
                           dataIndex: 'isNightShift',
                           key: 'isNightShift',
                           align: 'center',
-                          width: 85,
+                          width: 90,
                           render: (isNight) => isNight ? <Tag color="purple">Ca đêm</Tag> : <Tag color="default">Ca ngày</Tag>,
                         },
                         {
@@ -2072,7 +2075,7 @@ const PayrollPage = () => {
                           dataIndex: 'approvedOTHours',
                           key: 'approvedOTHours',
                           align: 'center',
-                          width: 85,
+                          width: 95,
                           render: (ot) => (ot > 0 ? <Tag color="orange">+{ot}h OT</Tag> : '0h'),
                         },
                         {
@@ -2080,18 +2083,20 @@ const PayrollPage = () => {
                           dataIndex: 'baseShiftPay',
                           key: 'baseShiftPay',
                           align: 'right',
+                          width: 120,
                           render: (amt, r) => formatVND(amt ?? r.shiftTotal ?? 0),
                         },
                         {
                           title: 'Thưởng Ca đêm / OT',
                           key: 'bonusPay',
                           align: 'right',
+                          width: 150,
                           render: (_, r) => {
-                            const night = r.nightShiftPay || 0;
-                            const ot = r.oTPay || 0;
+                            const night = r.nightShiftPay ?? r.NightShiftPay ?? r.nightPay ?? 0;
+                            const ot = r.otPay ?? r.oTPay ?? r.OTPay ?? r.approvedOTPay ?? 0;
                             if (night === 0 && ot === 0) return '0 đ';
                             return (
-                              <div style={{ fontSize: 11 }}>
+                              <div style={{ fontSize: 11, textAlign: 'right' }}>
                                 {night > 0 && <span style={{ color: '#722ed1', display: 'block' }}>Đêm: +{formatVND(night)}</span>}
                                 {ot > 0 && <span style={{ color: '#fa8c16', display: 'block' }}>OT: +{formatVND(ot)}</span>}
                               </div>
@@ -2103,6 +2108,7 @@ const PayrollPage = () => {
                           dataIndex: 'totalShiftPay',
                           key: 'totalShiftPay',
                           align: 'right',
+                          width: 135,
                           render: (amt, r) => <strong style={{ color: '#e8442a' }}>{formatVND(amt ?? r.shiftTotal ?? 0)}</strong>,
                         },
                       ]}

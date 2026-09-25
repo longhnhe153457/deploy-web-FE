@@ -118,13 +118,28 @@ const ReservationPage = ({ isPosHub }) => {
 
 
 
+  const statusPriority = { 'Pending': 0, 'Confirmed': 1, 'Cancelled': 2, 'Completed': 3 };
+
   const filteredReservations = reservations.filter(r => {
     const isSameDate = dayjs(r.reservationTime).isSame(selectedDate, 'day');
-    if (activeTab !== 'Pending' && !isSameDate) return false;
+
+    // Tab Pending: hiện tất cả Pending bất kể ngày
+    if (activeTab === 'Pending') return r.status === 'Pending';
+
+    // Các tab còn lại: lọc theo ngày, nhưng luôn include Pending
+    if (!isSameDate && r.status !== 'Pending') return false;
 
     if (activeTab === 'All') return true;
     return r.status === activeTab;
-  }).sort((a, b) => dayjs(a.reservationTime).diff(dayjs(b.reservationTime)));
+  }).sort((a, b) => {
+    // Tab Tất cả: ưu tiên Pending > Confirmed > Cancelled > Completed
+    if (activeTab === 'All') {
+      const pa = statusPriority[a.status] ?? 99;
+      const pb = statusPriority[b.status] ?? 99;
+      if (pa !== pb) return pa - pb;
+    }
+    return dayjs(a.reservationTime).diff(dayjs(b.reservationTime));
+  });
 
   const renderReservationCard = (r) => {
     const rTime = dayjs(r.reservationTime);
@@ -161,6 +176,8 @@ const ReservationPage = ({ isPosHub }) => {
       return null;
     };
 
+    const isSameDay = rTime.isSame(selectedDate, 'day');
+
     return (
       <Col xs={24} sm={12} md={12} lg={8} xl={6} key={r.id}>
         <Card
@@ -170,7 +187,10 @@ const ReservationPage = ({ isPosHub }) => {
           headStyle={{ borderBottom: `1px solid ${cardBorderColor}`, backgroundColor: 'transparent' }}
           title={
             <Space>
-              <span className="reservation-card-time">{rTime.format('HH:mm')}</span>
+              <span className="reservation-card-time">
+                {!isSameDay && <div style={{ fontSize: 14, color: '#666', fontWeight: 500, lineHeight: 1, marginBottom: 2 }}>{rTime.format('DD/MM/YYYY')}</div>}
+                {rTime.format('HH:mm')}
+              </span>
               {getStatusTag()}
             </Space>
           }
@@ -255,9 +275,11 @@ const ReservationPage = ({ isPosHub }) => {
     );
   };
 
+  const pendingCount = reservations.filter(r => r.status === 'Pending').length;
+
   const tabs = [
     { key: 'All', label: `Tất cả (${reservations.filter(r => dayjs(r.reservationTime).isSame(selectedDate, 'day')).length})` },
-    { key: 'Pending', label: 'Chờ xác nhận' },
+    { key: 'Pending', label: `Chờ xác nhận${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
     { key: 'Confirmed', label: 'Chờ đến' },
     { key: 'Completed', label: 'Đã đến' },
     { key: 'Cancelled', label: 'Đã hủy' }

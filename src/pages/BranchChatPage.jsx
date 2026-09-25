@@ -508,7 +508,7 @@ const BranchChatPage = () => {
         <Alert
           message={
             <span>
-              <strong>Phiên Trò Chuyện Thu Ngân</strong> | Nhân viên: {user?.name || user?.fullName} | Ca: {shiftInfo.name} ({shiftInfo.time}) | Ngắt kết nối lúc: {shiftInfo.disconnectTime?.format ? shiftInfo.disconnectTime.format('HH:mm') : ''}
+              <strong>Phiên Trò Chuyện Thu Ngân</strong> | Nhân viên: {user?.name || user?.fullName} | Ca: {shiftInfo.name} ({shiftInfo.time})
             </span>
           }
           type="info"

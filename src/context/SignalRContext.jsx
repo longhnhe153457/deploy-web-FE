@@ -10,9 +10,9 @@ export const SignalRProvider = ({ children }) => {
 
   useEffect(() => {
     let isMounted = true;
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
-      || (import.meta.env.DEV ? 'http://localhost:5067' : 'https://deploy-web-production.up.railway.app');
-    const hubUrl = `${baseUrl}/notificationHub`;
+    const hubUrl = import.meta.env.DEV
+      ? 'http://localhost:5067/notificationHub'
+      : 'https://deploy-web-production.up.railway.app/notificationHub';
 
     const connect = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl)

@@ -1,14 +1,14 @@
 import axiosInstance from './axiosInstance';
 
 // ─── Order ────────────────────────────────────────────────────────────────
-export const getAllOrders = (branchId) =>
-  axiosInstance.get('/api/Order', { params: { branchId } });
+export const getAllOrders = (branchId, startDate = null, endDate = null) =>
+  axiosInstance.get('/api/Order', { params: { branchId, startDate, endDate } });
 
 export const getReturnableOrders = (branchId) =>
   axiosInstance.get('/api/Order/returnable', { params: { branchId } });
 
-export const getPaidInvoices = (branchId) =>
-  axiosInstance.get('/api/Order/invoices', { params: { branchId } });
+export const getPaidInvoices = (branchId, startDate = null, endDate = null) =>
+  axiosInstance.get('/api/Order/invoices', { params: { branchId, startDate, endDate } });
 
 // Lịch sử huỷ món: đơn đã hoàn thành (bếp làm chậm) vs đơn chờ xác nhận
 export const getCancelledHistory = (branchId, params = {}) =>

@@ -452,7 +452,7 @@ const BranchPage = () => {
                               }}
                             >
                               ⚠️ Dữ liệu Chi nhánh vẫn sẽ được lưu trữ (liên hệ
-                              quản trị viên để mở lại) ⚠️
+                              chủ sở hữu để mở lại) ⚠️
                             </div>
                           </div>
                         ),
