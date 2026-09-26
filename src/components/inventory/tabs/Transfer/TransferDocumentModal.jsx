@@ -10,7 +10,7 @@ import {
 import dayjs from 'dayjs';
 
 import { getProductsByDate, getPreviousLedgerSnapshots } from '../../../../api/binventoryApi';
-import { getAllBranches } from '../../../../api/branchApi';
+import { getAllBranches, getTransferDestinationBranches } from '../../../../api/branchApi';
 import {
   createTransferPending,
   createTransferCompleted,
@@ -107,7 +107,7 @@ const TransferDocumentModal = ({
   // Fetch branches excluding current branch and inactive branches
   useEffect(() => {
     if (open) {
-      getAllBranches()
+      getTransferDestinationBranches()
         .then((res) => {
           const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
           setBranches(list);
@@ -121,7 +121,7 @@ const TransferDocumentModal = ({
           }
         })
         .catch((err) => {
-          console.error('Failed to load branches:', err);
+          console.error('Failed to load transfer destination branches:', err);
           setBranches([]);
         });
     }

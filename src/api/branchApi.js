@@ -17,3 +17,7 @@ export const updateBranch = (data) =>
 
 export const deleteBranch = (id) =>
   axiosInstance.delete(`/api/Branch/${id}`);
+
+export const getTransferDestinationBranches = () =>
+  axiosInstance.get('/api/Branch/transfer-destinations');
+
