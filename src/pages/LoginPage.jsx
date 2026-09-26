@@ -13,7 +13,8 @@ import { useAuth } from "../context/AuthContext";
 import { useDevice } from "../context/DeviceContext";
 import { login } from "../api/authApi";
 import ForgotPasswordModal from "../components/auth/ForgotPasswordModal";
-
+import logoUrl from "../assets/logo.png";
+import backgroundlogoUrl from "../assets/background.png";
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [forgotModalVisible, setForgotModalVisible] = useState(false);
@@ -23,8 +24,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  const logoUrl = "/src/assets/logo.png";
-  const backgroundlogoUrl = "/src/assets/background.png";
+
 
   //================================================================================================================= HANDLE LOGIN
   const handleLogin = async (values) => {

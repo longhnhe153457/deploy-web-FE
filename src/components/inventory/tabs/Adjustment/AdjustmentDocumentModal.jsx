@@ -541,10 +541,12 @@ const AdjustmentDocumentModal = ({
                           </td>
                           <td style={{ padding: '8px 10px', textAlign: 'center' }}>
                             <input
-                              type="number"
-                              min={0}
-                              value={item.newAvgCost}
-                              onChange={(e) => handleCostChange(item.id, e.target.value)}
+                              type="text"
+                              value={Number(item.newAvgCost).toLocaleString('vi-VN')}
+                              onChange={(e) => {
+                                const rawVal = e.target.value.replace(/[^0-9]/g, '');
+                                handleCostChange(item.id, rawVal);
+                              }}
                               style={{
                                 width: 120,
                                 height: 28,

@@ -11,12 +11,14 @@ import {
   InboxOutlined,
   FilterOutlined,
   SettingOutlined,
-  CloseOutlined
+  CloseOutlined,
+  EditOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getBatches, getBatchExpirySummary, getBatchAlertSettings, updateBatchAlertSettings } from '../../../../api/batchApi';
 import { renderBatchStatusBadge, renderExpiryStatusBadge } from '../../utils/batchHelper';
 import BatchTraceabilityDrawer from './BatchTraceabilityDrawer';
+import BatchDateEditModal from './BatchDateEditModal';
 import PaginationFooter from '../../../shared/PaginationFooter';
 
 const showNotificationToast = (text, type = 'success') => {
@@ -90,6 +92,17 @@ const BatchExpiryTab = ({ selectedBranchId }) => {
   // Traceability Drawer State
   const [traceDrawerOpen, setTraceDrawerOpen] = useState(false);
   const [selectedTraceBatchId, setSelectedTraceBatchId] = useState(null);
+
+  // Date Edit Modal State
+  const [dateEditModalOpen, setDateEditModalOpen] = useState(false);
+  const [selectedDateEditBatch, setSelectedDateEditBatch] = useState(null);
+  const [dateEditField, setDateEditField] = useState('expiryDate');
+
+  const handleOpenDateEdit = (batch, field = 'expiryDate') => {
+    setSelectedDateEditBatch(batch);
+    setDateEditField(field);
+    setDateEditModalOpen(true);
+  };
 
   // Settings Modal State
   const [settingModalOpen, setSettingModalOpen] = useState(false);
@@ -548,28 +561,51 @@ const BatchExpiryTab = ({ selectedBranchId }) => {
                       {renderExpiryStatusBadge(b.expiryDate, b.daysUntilExpiry, b.quantityRemaining, b.status)}
                     </td>
                     <td style={{ padding: '10px 12px', textAlign: 'center' }}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedTraceBatchId(b.id);
-                          setTraceDrawerOpen(true);
-                        }}
-                        style={{
-                          background: '#eff6ff',
-                          color: '#2563eb',
-                          border: '1px solid #bfdbfe',
-                          borderRadius: 4,
-                          padding: '4px 10px',
-                          fontSize: 11,
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4
-                        }}
-                      >
-                        <CompassOutlined /> Truy vết Lô
-                      </button>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+                        <button
+                          type="button"
+                          title="Sửa ngày sản xuất & hạn sử dụng"
+                          onClick={() => handleOpenDateEdit(b, 'expiryDate')}
+                          style={{
+                            background: '#ffffff',
+                            color: '#2563eb',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: 4,
+                            padding: '4px 8px',
+                            fontSize: 12,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <EditOutlined style={{ fontSize: 13 }} /> Sửa
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedTraceBatchId(b.id);
+                            setTraceDrawerOpen(true);
+                          }}
+                          style={{
+                            background: '#eff6ff',
+                            color: '#2563eb',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: 4,
+                            padding: '4px 10px',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4
+                          }}
+                        >
+                          <CompassOutlined /> Truy vết Lô
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -598,6 +634,21 @@ const BatchExpiryTab = ({ selectedBranchId }) => {
           setSelectedTraceBatchId(null);
         }}
         onActionSuccess={() => {
+          fetchBatchesList();
+          fetchSummary();
+        }}
+      />
+
+      {/* ─── 5.1 MODAL SỬA NGÀY SX & HSD LÔ HÀNG ────────────────────────────── */}
+      <BatchDateEditModal
+        open={dateEditModalOpen}
+        batch={selectedDateEditBatch}
+        initialFocusField={dateEditField}
+        onClose={() => {
+          setDateEditModalOpen(false);
+          setSelectedDateEditBatch(null);
+        }}
+        onSuccess={() => {
           fetchBatchesList();
           fetchSummary();
         }}

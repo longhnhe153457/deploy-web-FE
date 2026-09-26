@@ -107,3 +107,15 @@ export const toggleBatchNotificationMute = async (batchId) => {
   return response.data;
 };
 
+/**
+ * Cập nhật Ngày sản xuất và Hạn sử dụng của Lô hàng
+ */
+export const updateBatchDates = async (batchId, { manufactureDate, expiryDate }) => {
+  const response = await axiosInstance.put(`/api/BInventory/batches/${batchId}/dates`, {
+    manufactureDate: manufactureDate ? new Date(manufactureDate).toISOString() : null,
+    expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null
+  });
+  return response.data;
+};
+
+

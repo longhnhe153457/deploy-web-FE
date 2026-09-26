@@ -245,6 +245,7 @@ const LeftoverPage = () => {
         reason: values.reason,
         shiftId: values.shiftId ?? null,
         recordDate: (values.recordDate || dayjs()).format('YYYY-MM-DD'),
+        atFaultAccountId: values.atFaultAccountId ?? null,
       });
       message.success('Đã ghi nhận món dư thừa');
       extraForm.resetFields();
@@ -309,6 +310,7 @@ const LeftoverPage = () => {
     { title: 'SL', dataIndex: 'quantity', key: 'quantity', width: 60 },
     { title: 'Lý do', dataIndex: 'reason', key: 'reason' },
     { title: 'Ca làm việc', dataIndex: 'shiftName', key: 'shiftName', render: (v) => v || '—' },
+    { title: 'Bếp chịu TN', dataIndex: 'atFaultAccountName', key: 'atFaultAccountName', render: (v) => v ? <span style={{ color: '#cf1322' }}>{v}</span> : '—' },
     { title: 'Ngày', dataIndex: 'recordDate', key: 'recordDate' },
     { title: 'Người ghi', dataIndex: 'createdByName', key: 'createdByName' },
     actionsColumn,
@@ -509,6 +511,16 @@ const LeftoverPage = () => {
 
               <Form.Item name="recordDate" label="Ngày" style={{ width: 160 }}>
                 <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+              </Form.Item>
+
+              <Form.Item name="atFaultAccountId" label="Nhân viên bếp chịu trách nhiệm (nếu có)" style={{ width: 260 }}>
+                <Select
+                  allowClear
+                  showSearch
+                  placeholder="Chọn nhân viên bếp"
+                  optionFilterProp="label"
+                  options={chefAccounts.map((a) => ({ value: a.id, label: a.name }))}
+                />
               </Form.Item>
             </Space>
 

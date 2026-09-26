@@ -160,7 +160,7 @@ const mapBeToReportData = (beStats, filteredInvoices, filteredCashFlows, filtere
     if (hr >= 6 && hr < 11) morningSlot.count++;
     else if (hr >= 11 && hr < 14) noonSlot.count++;
     else if (hr >= 14 && hr < 18) afternoonSlot.count++;
-    else if (hr >= 18 && hr < 22) nightSlot.count++;
+    else if (hr >= 18 || hr < 6) nightSlot.count++;
   });
 
   const hourlyTrends = [
@@ -326,16 +326,19 @@ const HomePage = () => {
       const rawAllOrders = allOrdersRes.status === "fulfilled" ? (allOrdersRes.value?.data || allOrdersRes.value || []) : [];
 
       const filteredInvoices = allInvoices.filter((ord) => {
-        return ord.createdAt && dayjs(ord.createdAt).format("DD/MM/YYYY") === dateStr;
+        const matchesBranch = !currentBranchId || !ord.branchId || ord.branchId === currentBranchId;
+        return matchesBranch && ord.createdAt && dayjs(ord.createdAt).format("DD/MM/YYYY") === dateStr;
       });
 
       const filteredCashFlows = allCashFlows.filter((cf) => {
+        const matchesBranch = !currentBranchId || !cf.branchId || cf.branchId === currentBranchId;
         const dateVal = cf.businessDate || cf.createdAt;
-        return dateVal && dayjs(dateVal).format("DD/MM/YYYY") === dateStr;
+        return matchesBranch && dateVal && dayjs(dateVal).format("DD/MM/YYYY") === dateStr;
       });
 
       const filteredAllOrders = rawAllOrders.filter((ord) => {
-        return ord.createdAt && dayjs(ord.createdAt).format("DD/MM/YYYY") === dateStr;
+        const matchesBranch = !currentBranchId || !ord.branchId || ord.branchId === currentBranchId;
+        return matchesBranch && ord.createdAt && dayjs(ord.createdAt).format("DD/MM/YYYY") === dateStr;
       });
 
       // Filter absent employees

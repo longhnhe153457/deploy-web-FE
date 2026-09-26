@@ -51,22 +51,27 @@ const SummaryReportCard = ({ salesList = [], cashFlowList = [] }) => {
       const amt = Number(s.total || 0);
       salesTotalVal += amt;
 
-      if (s.paymentMethod === "Tiền mặt") {
+      const rawMethod = String(s.paymentMethod || '').trim().toLowerCase();
+      const isCard = rawMethod === 'card' || rawMethod.includes('thẻ') || rawMethod.includes('visa') || rawMethod.includes('master');
+      const isBank = rawMethod === 'payos' || rawMethod === 'bank' || rawMethod.includes('khoản') || rawMethod.includes('qr');
+      const isCash = !isCard && !isBank;
+
+      if (isCash) {
         salesCashVal += amt;
         salesCashCount += 1;
-      } else if (s.paymentMethod === "Chuyển khoản / QR") {
+      } else if (isBank) {
         salesBankVal += amt;
         salesBankCount += 1;
-      } else if (s.paymentMethod === "Thẻ Visa/Master") {
+      } else if (isCard) {
         salesCardVal += amt;
         salesCardCount += 1;
       }
     });
 
     // B. Phân tích cashFlowList
-    let cfThuCash = salesCashVal;
-    let cfThuBank = salesBankVal;
-    let cfThuCard = salesCardVal;
+    let cfThuCash = 0;
+    let cfThuBank = 0;
+    let cfThuCard = 0;
 
     let cfChiCash = 0;
     let cfChiBank = 0;

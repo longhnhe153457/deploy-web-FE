@@ -387,9 +387,20 @@ const Partner_Detail = () => {
       </div>
 
       {/* BODY */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div
+        className="pretty-scrollbar"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+          padding: '16px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 14
+        }}
+      >
         {/* CARDS TỔNG QUAN HỒ SƠ & TÀI CHÍNH */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
           {/* THẺ 1: THÔNG TIN ĐỐI TÁC */}
           <div style={{ background: '#ffffff', borderRadius: 8, border: '1px solid #e2e8f0', padding: '16px 20px' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -552,7 +563,7 @@ const Partner_Detail = () => {
 
           {/* NỘI DUNG TAB PHIẾU NHẬP HÀNG */}
           {activeTab === 'docs' && (
-            <div style={{ maxHeight: '450px', overflowY: 'auto', overflowX: 'auto', width: '100%' }}>
+            <div className="pretty-scrollbar" style={{ maxHeight: '450px', overflowY: 'auto', overflowX: 'auto', width: '100%' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5, textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f1f5f9' }}>
                   <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1', color: '#334155', fontWeight: 700, textTransform: 'uppercase', fontSize: 10.5 }}>
@@ -827,7 +838,7 @@ const Partner_Detail = () => {
 
           {/* NỘI DUNG TAB LỊCH SỬ GIAO DỊCH */}
           {activeTab === 'cashflows' && (
-            <div style={{ maxHeight: '450px', overflowY: 'auto', overflowX: 'auto', width: '100%' }}>
+            <div className="pretty-scrollbar" style={{ maxHeight: '450px', overflowY: 'auto', overflowX: 'auto', width: '100%' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5, textAlign: 'left' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f1f5f9' }}>
                   <tr style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1', color: '#334155', fontWeight: 700, textTransform: 'uppercase', fontSize: 10.5 }}>
@@ -921,23 +932,7 @@ const Partner_Detail = () => {
 
           {/* NỘI DUNG TAB HÌNH ẢNH HỢP ĐỒNG */}
           {activeTab === 'images' && (
-            <div style={{ padding: '20px' }}>
-              {/* THANH TIÊU ĐỀ TAB */}
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#0f172a',
-                  marginBottom: 14,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8
-                }}
-              >
-                <PictureOutlined style={{ color: '#ea580c', fontSize: 16 }} />
-                <span>Hình ảnh hợp đồng & chứng từ đối tác ({partner?.imageUrls?.length || 0})</span>
-              </div>
-
+            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
               {/* INPUT FILE ẨN ĐỂ MỞ THƯ MỤC / CHỌN ẢNH */}
               <input
                 type="file"
@@ -948,86 +943,79 @@ const Partner_Detail = () => {
                 style={{ display: 'none' }}
               />
 
-              {/* KHU VỰC KÉO THẢ ẢNH (DROPZONE) */}
+              {/* THANH ĐIỀU KHIỂN & KÉO THẢ TẢI ẢNH GỌN GÀNG */}
               <div
                 onDragEnter={handleDragEnter}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: isDragging ? '2px dashed #ea580c' : '2px dashed #cbd5e1',
+                  border: isDragging ? '2px dashed #ea580c' : '1.5px dashed #cbd5e1',
                   background: isDragging ? '#fff7ed' : '#f8fafc',
                   borderRadius: 8,
-                  padding: isDragging ? '28px 20px' : '20px',
-                  textAlign: 'center',
-                  marginBottom: 16,
+                  padding: '10px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  cursor: 'pointer',
                   transition: 'all 0.2s ease',
-                  boxShadow: isDragging ? '0 8px 24px rgba(234, 88, 12, 0.25)' : 'none',
-                  cursor: 'pointer'
+                  boxShadow: isDragging ? '0 4px 12px rgba(234, 88, 12, 0.2)' : 'none'
                 }}
-                onClick={() => fileInputRef.current?.click()}
               >
-                {isDragging ? (
-                  <div style={{ pointerEvents: 'none' }}>
-                    <div
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        background: '#ea580c',
-                        color: '#ffffff',
-                        padding: '6px 20px',
-                        borderRadius: 20,
-                        fontSize: 13,
-                        fontWeight: 800,
-                        marginBottom: 8,
-                        boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)'
-                      }}
-                    >
-                      <CloudUploadOutlined style={{ fontSize: 16 }} /> SẴN SÀNG TẢI ẢNH LÊN
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#c2410c' }}>
-                      Thả các ảnh hợp đồng vào đây ngay để tải lên!
-                    </div>
-                    <div style={{ fontSize: 11.5, color: '#ea580c', marginTop: 4 }}>
-                      Hệ thống sẽ tự động lưu ảnh vào hồ sơ của đối tác này
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: isDragging ? '#ea580c' : '#ffedd5',
+                      color: isDragging ? '#ffffff' : '#ea580c',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 18,
+                      flexShrink: 0
+                    }}
+                  >
+                    <CloudUploadOutlined />
                   </div>
-                ) : (
                   <div>
-                    <CloudUploadOutlined style={{ fontSize: 32, color: '#94a3b8', marginBottom: 8 }} />
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>
-                      Kéo thả ảnh vào đây, hoặc nhấn để mở thư mục chọn ảnh từ máy tính
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: isDragging ? '#c2410c' : '#1e293b' }}>
+                      {isDragging ? 'Thả các tệp ảnh vào đây ngay để tải lên' : 'Kéo thả ảnh hợp đồng / chứng từ vào đây, hoặc nhấn để tải lên'}
                     </div>
-                    <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 4 }}>
-                      Định dạng hỗ trợ: PNG, JPG, JPEG, WEBP. Cho phép chọn và tải lên nhiều ảnh cùng lúc.
+                    <div style={{ fontSize: 11, color: '#64748b' }}>
+                      Hỗ trợ định dạng PNG, JPG, JPEG, WEBP. Cho phép chọn và tải lên nhiều ảnh cùng lúc.
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      disabled={uploadingImage}
-                      style={{
-                        marginTop: 12,
-                        padding: '5px 16px',
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: 6,
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: '#334155',
-                        cursor: uploadingImage ? 'not-allowed' : 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6
-                      }}
-                    >
-                      <UploadOutlined style={{ color: '#ea580c' }} /> Mở thư mục chọn ảnh
-                    </button>
                   </div>
-                )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  disabled={uploadingImage}
+                  style={{
+                    padding: '6px 14px',
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 6,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#334155',
+                    cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexShrink: 0,
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <UploadOutlined style={{ color: '#ea580c' }} /> Chọn ảnh từ máy tính
+                </button>
               </div>
 
               {/* TRẠNG THÁI ĐANG TẢI ẢNH LÊN */}
@@ -1037,13 +1025,12 @@ const Partner_Detail = () => {
                     background: '#fff7ed',
                     border: '1px solid #fed7aa',
                     borderRadius: 6,
-                    padding: '12px 16px',
-                    marginBottom: 16,
+                    padding: '8px 14px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
-                    fontSize: 12.5,
+                    fontSize: 12,
                     color: '#ea580c',
                     fontWeight: 600
                   }}
@@ -1058,123 +1045,132 @@ const Partner_Detail = () => {
                   style={{
                     border: '1px dashed #e2e8f0',
                     borderRadius: 8,
-                    padding: '36px 20px',
+                    padding: '30px 16px',
                     textAlign: 'center',
                     color: '#94a3b8',
                     fontSize: 12
                   }}
                 >
-                  <PictureOutlined style={{ fontSize: 32, color: '#cbd5e1', marginBottom: 8, display: 'block' }} />
+                  <PictureOutlined style={{ fontSize: 30, color: '#cbd5e1', marginBottom: 6, display: 'block' }} />
                   Chưa có hình ảnh hợp đồng nào được tải lên cho đối tác này.
                 </div>
               ) : (
                 <div
                   style={{
-                    maxHeight: 450,
-                    overflowY: 'auto',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 8,
-                    padding: 14,
-                    background: '#f8fafc'
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                    gap: 14,
+                    padding: '2px 0'
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
-                      gap: 14
-                    }}
-                  >
-                    {partner.imageUrls.map((url, index) => (
+                  {partner.imageUrls.map((url, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      {/* HÌNH ẢNH PREVIEW */}
                       <div
-                        key={index}
                         style={{
-                          background: '#ffffff',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: 8,
+                          height: 140,
                           overflow: 'hidden',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                          background: '#0f172a',
                           display: 'flex',
-                          flexDirection: 'column'
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          position: 'relative'
                         }}
+                        onClick={() => setPreviewImage(url)}
+                        title="Nhấp vào ảnh để phóng to"
                       >
-                        {/* HÌNH ẢNH PREVIEW */}
+                        <img
+                          src={url}
+                          alt={`Ảnh hợp đồng ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            transition: 'transform 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                        />
                         <div
                           style={{
-                            height: 140,
-                            overflow: 'hidden',
-                            background: '#0f172a',
+                            position: 'absolute',
+                            top: 6,
+                            right: 6,
+                            background: 'rgba(15, 23, 42, 0.65)',
+                            color: '#ffffff',
+                            borderRadius: 4,
+                            padding: '2px 6px',
+                            fontSize: 10,
+                            fontWeight: 600,
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => setPreviewImage(url)}
-                          title="Nhấp vào ảnh để phóng to"
-                        >
-                          <img
-                            src={url}
-                            alt="Ảnh hợp đồng"
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                              transition: 'transform 0.2s ease'
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-                          />
-                        </div>
-
-                        {/* NÚT XÓA ẢNH */}
-                        <div
-                          style={{
-                            padding: '6px 8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: '#ffffff',
-                            borderTop: '1px solid #f1f5f9'
+                            gap: 3
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleConfirmDeleteImage(index);
-                            }}
-                            style={{
-                              width: '100%',
-                              background: '#fef2f2',
-                              color: '#dc2626',
-                              border: '1px solid #fecaca',
-                              borderRadius: 4,
-                              padding: '5px 8px',
-                              fontSize: 11.5,
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              gap: 6,
-                              transition: 'all 0.15s ease'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = '#fee2e2';
-                              e.currentTarget.style.borderColor = '#ef4444';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = '#fef2f2';
-                              e.currentTarget.style.borderColor = '#fecaca';
-                            }}
-                            title="Xóa ảnh này"
-                          >
-                            <DeleteOutlined /> Xóa ảnh
-                          </button>
+                          <ZoomInOutlined /> #{index + 1}
                         </div>
                       </div>
-                    ))}
-                  </div>
+
+                      {/* NÚT XÓA ẢNH */}
+                      <div
+                        style={{
+                          padding: '6px 8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#ffffff',
+                          borderTop: '1px solid #f1f5f9'
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleConfirmDeleteImage(index);
+                          }}
+                          style={{
+                            width: '100%',
+                            background: '#fef2f2',
+                            color: '#dc2626',
+                            border: '1px solid #fecaca',
+                            borderRadius: 4,
+                            padding: '4px 8px',
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#fee2e2';
+                            e.currentTarget.style.borderColor = '#ef4444';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#fef2f2';
+                            e.currentTarget.style.borderColor = '#fecaca';
+                          }}
+                          title="Xóa ảnh này"
+                        >
+                          <DeleteOutlined /> Xóa ảnh
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

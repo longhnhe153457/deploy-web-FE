@@ -17,8 +17,8 @@ export const updateCookingStatus = (detailId, cookingStatus, quantity = null) =>
 /**
  * Cập nhật trạng thái cho nhiều món cùng lúc (hỗ trợ Batch Processing - AF1)
  */
-export const batchUpdateCookingStatus = (productId, cookingStatus) =>
-  axiosInstance.put('/api/Order/batch-cooking-status', { productId, cookingStatus });
+export const batchUpdateCookingStatus = (productId, cookingStatus, branchId = null, quantity = null) =>
+  axiosInstance.put('/api/Order/batch-cooking-status', { productId, cookingStatus, branchId, quantity });
 
 /**
  * Hủy món ăn chi tiết từ KDS

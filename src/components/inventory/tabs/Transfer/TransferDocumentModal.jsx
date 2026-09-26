@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   SearchOutlined,
   DeleteOutlined,
@@ -803,12 +803,11 @@ const TransferDocumentModal = ({
                         </td>
                         <td style={{ textAlign: 'right', padding: '6px 10px' }}>
                           <input
-                            type="number"
-                            min={0}
-                            step="any"
-                            value={record.transferPrice ?? 0}
+                            type="text"
+                            value={record.transferPrice != null ? Number(record.transferPrice).toLocaleString('vi-VN') : '0'}
                             onChange={(e) => {
-                              const val = e.target.value !== '' ? Math.max(0, Number(e.target.value)) : 0;
+                              const rawVal = e.target.value.replace(/\D/g, '');
+                              const val = rawVal !== '' ? Math.max(0, Number(rawVal)) : 0;
                               const updated = [...items];
                               updated[index] = { ...updated[index], transferPrice: val };
                               setItems(updated);

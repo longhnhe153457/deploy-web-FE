@@ -945,10 +945,13 @@ const ImportDocumentModal = ({
                         </td>
                         <td style={{ textAlign: 'right', padding: '6px 4px' }}>
                           <input
-                            type="number"
-                            min={0}
-                            value={item.unitPrice}
-                            onChange={(e) => handleItemChange(item.rowId, 'unitPrice', Math.max(0, Number(e.target.value)))}
+                            type="text"
+                            value={Number(item.unitPrice || 0).toLocaleString('vi-VN')}
+                            onChange={(e) => {
+                              const rawVal = e.target.value.replace(/[^0-9]/g, '');
+                              const numVal = rawVal ? Number(rawVal) : 0;
+                              handleItemChange(item.rowId, 'unitPrice', Math.max(0, numVal));
+                            }}
                             style={{
                               width: 80,
                               height: 26,

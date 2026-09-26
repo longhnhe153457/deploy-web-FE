@@ -29,7 +29,7 @@ const ExportDeleteTable = ({
   handleDeleteDocument,
   onRefresh,
   expiredCount = 0,
-  onOpenExpiredModal,
+  onOpenExpiredDisposal,
   loadingExpired = false
 }) => {
   const navigate = useNavigate();
@@ -163,7 +163,7 @@ const ExportDeleteTable = ({
           {/* NÚT XUẤT HỎNG */}
           <button
             type="button"
-            onClick={onOpenExpiredModal}
+            onClick={onOpenExpiredDisposal}
             disabled={loadingExpired}
             style={{
               background: '#fff1f2',

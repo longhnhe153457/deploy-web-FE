@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CloseOutlined } from '@ant-design/icons';
+import { message } from 'antd';
 
 const PartnerModal = ({
   open,
@@ -12,9 +13,7 @@ const PartnerModal = ({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
   const [type, setType] = useState('Nhà cung cấp');
-  const [note, setNote] = useState('');
 
   useEffect(() => {
     if (open) {
@@ -22,24 +21,20 @@ const PartnerModal = ({
         setName(editingPartner.name || '');
         setPhone(editingPartner.phone || '');
         setEmail(editingPartner.email || '');
-        setAddress(editingPartner.address || '');
         
-        // Map from backend Enum (e.g. Supplier, Customer) to frontend string if needed
+        // Ánh xạ từ enum backend hoặc chuỗi sang loại hiển thị trên frontend
         let typeStr = 'Nhà cung cấp';
-        if (editingPartner.type === 'Supplier' || editingPartner.type === 'Nhà cung cấp') typeStr = 'Nhà cung cấp';
-        else if (editingPartner.type === 'Customer' || editingPartner.type === 'Khách hàng') typeStr = 'Khách hàng';
-        else if (editingPartner.type === 'Transporter' || editingPartner.type === 'Vận chuyển') typeStr = 'Vận chuyển';
-        else if (editingPartner.type === 'Other' || editingPartner.type === 'Khác') typeStr = 'Khác';
+        const pType = editingPartner.type;
+        if (pType === 1 || pType === '1' || pType === 'Supplier' || pType === 'Nhà cung cấp') typeStr = 'Nhà cung cấp';
+        else if (pType === 3 || pType === '3' || pType === 'Transporter' || pType === 'Vận chuyển') typeStr = 'Vận chuyển';
+        else if (pType === 4 || pType === '4' || pType === 'Other' || pType === 'Khác') typeStr = 'Khác';
+        else typeStr = 'Nhà cung cấp';
         setType(typeStr);
-
-        setNote(editingPartner.note || '');
       } else {
         setName('');
         setPhone('');
         setEmail('');
-        setAddress('');
         setType('Nhà cung cấp');
-        setNote('');
       }
     }
   }, [open, editingPartner]);
@@ -48,42 +43,52 @@ const PartnerModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!name.trim()) {
+      message.error('Vui lòng nhập tên đối tác');
+      return;
+    }
+    if (!phone.trim()) {
+      message.error('Vui lòng nhập số điện thoại');
+      return;
+    }
+
     setLoading(true);
     try {
       const { createPartner, updatePartner } = await import('../../../../api/partnerApi');
       
       let mappedType = 1; // Supplier = 1
-      if (type === 'Khách hàng') mappedType = 2; // Customer = 2
-      else if (type === 'Vận chuyển') mappedType = 3; // Transporter = 3
+      if (type === 'Vận chuyển') mappedType = 3; // Transporter = 3
       else if (type === 'Khác') mappedType = 4; // Other = 4
+      else mappedType = 1; // Supplier = 1
 
       const payload = {
-        name,
-        phone,
-        email,
-        address,
-        note,
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email?.trim() ? email.trim() : null,
         type: mappedType
       };
 
       if (editingPartner) {
         await updatePartner(editingPartner.id, payload);
-        alert('Cập nhật đối tác thành công!');
+        message.success('Cập nhật đối tác thành công!');
       } else {
         payload.branchId = selectedBranchId;
         await createPartner(payload);
-        alert('Thêm đối tác thành công!');
+        message.success('Thêm đối tác thành công!');
       }
       
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
       console.error('Error saving partner:', error);
-      alert('Không thể lưu đối tác. Vui lòng kiểm tra lại!');
+      const errorMsg = error?.response?.data?.message || 'Không thể lưu đối tác. Vui lòng kiểm tra lại!';
+      message.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
+
+  const isSaveDisabled = loading || !name.trim() || !phone.trim();
 
   return (
     <div
@@ -125,7 +130,9 @@ const PartnerModal = ({
             background: '#ffffff'
           }}
         >
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>Thêm nhà cung cấp / đối tác mới</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>
+            {editingPartner ? 'Cập nhật thông tin đối tác' : 'Thêm nhà cung cấp / đối tác mới'}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -163,10 +170,11 @@ const PartnerModal = ({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
-                  Số điện thoại
+                  Số điện thoại *
                 </label>
                 <input
                   type="text"
+                  required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="0901..."
@@ -190,7 +198,7 @@ const PartnerModal = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="partner@gmail.com"
+                  placeholder="partner@gmail.com (không bắt buộc)"
                   style={{
                     width: '100%',
                     height: 34,
@@ -204,10 +212,10 @@ const PartnerModal = ({
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
-                  Phân loại đối tác
+                  Phân loại đối tác *
                 </label>
                 <select
                   value={type}
@@ -228,48 +236,6 @@ const PartnerModal = ({
                   <option value="Khác">Khác</option>
                 </select>
               </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
-                  Địa chỉ
-                </label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Địa chỉ giao dịch..."
-                  style={{
-                    width: '100%',
-                    height: 34,
-                    padding: '0 10px',
-                    fontSize: 12,
-                    borderRadius: 6,
-                    border: '1px solid #cbd5e1',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
-                Ghi chú
-              </label>
-              <input
-                type="text"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Ghi chú thêm về đối tác..."
-                style={{
-                  width: '100%',
-                  height: 34,
-                  padding: '0 10px',
-                  fontSize: 12,
-                  borderRadius: 6,
-                  border: '1px solid #cbd5e1',
-                  outline: 'none'
-                }}
-              />
             </div>
           </div>
 
@@ -279,7 +245,7 @@ const PartnerModal = ({
               padding: '12px 20px',
               borderTop: '1px solid #e2e8f0',
               display: 'flex',
-              justify: 'flex-end',
+              justifyContent: 'flex-end',
               gap: 8,
               background: '#f8fafc'
             }}
@@ -302,7 +268,7 @@ const PartnerModal = ({
             </button>
             <button
               type="submit"
-              disabled={loading || !name}
+              disabled={isSaveDisabled}
               style={{
                 height: 32,
                 padding: '0 16px',
@@ -310,12 +276,12 @@ const PartnerModal = ({
                 fontWeight: 600,
                 borderRadius: 6,
                 border: 'none',
-                background: loading || !name ? '#cbd5e1' : '#e8442a',
+                background: isSaveDisabled ? '#cbd5e1' : '#e8442a',
                 color: '#ffffff',
-                cursor: loading || !name ? 'not-allowed' : 'pointer'
+                cursor: isSaveDisabled ? 'not-allowed' : 'pointer'
               }}
             >
-              {loading ? 'Đang lưu...' : 'Lưu đối tác'}
+              {loading ? 'Đang lưu...' : (editingPartner ? 'Cập nhật đối tác' : 'Lưu đối tác')}
             </button>
           </div>
         </form>

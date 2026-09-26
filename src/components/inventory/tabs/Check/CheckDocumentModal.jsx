@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   SearchOutlined,
   DeleteOutlined,
@@ -11,6 +11,7 @@ import {
 import dayjs from 'dayjs';
 
 import { getProductsByDate, getPreviousLedgerSnapshots } from '../../../../api/binventoryApi';
+import { getBatches } from '../../../../api/batchApi';
 import {
   createCheckPending,
   createCheckCompleted,
@@ -393,6 +394,7 @@ const CheckDocumentModal = ({
         details: items.map((i) => ({
           bInventoryId: Number(i.bInventoryId),
           unitConversionId: i.unitConversionId ? Number(i.unitConversionId) : null,
+          systemQuantity: Number(i.baseStock ?? i.systemStock ?? 0),
           actualQuantity: Number(i.actualQuantity),
           batchId: i.batchId ? Number(i.batchId) : null,
           batchCodeSnapshot: i.batchCode ? i.batchCode.trim() : undefined,
@@ -694,9 +696,88 @@ const CheckDocumentModal = ({
                         <td style={{ padding: '6px 4px' }}>
                           <input
                             type="text"
+                            list={`batch-list-${record.rowId}`}
                             placeholder="Mã Lô..."
                             value={record.batchCode || ''}
-                            onChange={(e) => handleFieldChange(index, 'batchCode', e.target.value)}
+                            onFocus={async () => {
+                              if (!record.batchesLoaded && record.bInventoryId) {
+                                try {
+                                  const res = await getBatches({ binventoryId: record.bInventoryId, pageSize: 100 });
+                                  const fetchedBatches = res?.items || (Array.isArray(res) ? res : []);
+                                  setItems(prev => {
+                                    const next = [...prev];
+                                    if (next[index]) {
+                                      next[index] = { ...next[index], batches: fetchedBatches, batchesLoaded: true };
+                                    }
+                                    return next;
+                                  });
+                                } catch (err) {
+                                  console.error('Failed to fetch batches:', err);
+                                }
+                              }
+                            }}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setItems(prev => {
+                                const next = [...prev];
+                                if (!next[index]) return next;
+                                
+                                const match = next[index].batches?.find(b => b.batchCode === val);
+                                if (match) {
+                                  const newBaseStock = match.quantityRemaining;
+                                  next[index] = {
+                                    ...next[index],
+                                    batchCode: val,
+                                    batchId: match.id,
+                                    baseStock: newBaseStock,
+                                    systemStock: newBaseStock,
+                                    actualQuantity: newBaseStock / (next[index].conversionPoint || 1),
+                                    manufactureDate: match.manufactureDate ? dayjs(match.manufactureDate).format('YYYY-MM-DD') : '',
+                                    expiryDate: match.expiryDate ? dayjs(match.expiryDate).format('YYYY-MM-DD') : ''
+                                  };
+                                } else {
+                                  next[index] = {
+                                    ...next[index],
+                                    batchCode: val,
+                                    batchId: null
+                                  };
+                                }
+                                return next;
+                              });
+                            }}
+                            onBlur={async (e) => {
+                              const val = e.target.value.trim();
+                              if (val && record.bInventoryId) {
+                                let match = record.batches?.find(b => b.batchCode === val);
+                                if (!match) {
+                                  try {
+                                    const res = await getBatches({ search: val, binventoryId: record.bInventoryId, pageSize: 1 });
+                                    const foundItems = res?.items || (Array.isArray(res) ? res : []);
+                                    if (foundItems.length > 0 && foundItems[0].batchCode === val) {
+                                      match = foundItems[0];
+                                    }
+                                  } catch (err) {}
+                                }
+                                if (match) {
+                                  setItems(prev => {
+                                    const next = [...prev];
+                                    if (!next[index]) return next;
+                                    const newBaseStock = match.quantityRemaining;
+                                    next[index] = {
+                                      ...next[index],
+                                      batchCode: val,
+                                      batchId: match.id,
+                                      baseStock: newBaseStock,
+                                      systemStock: newBaseStock,
+                                      actualQuantity: newBaseStock / (next[index].conversionPoint || 1),
+                                      manufactureDate: match.manufactureDate ? dayjs(match.manufactureDate).format('YYYY-MM-DD') : '',
+                                      expiryDate: match.expiryDate ? dayjs(match.expiryDate).format('YYYY-MM-DD') : ''
+                                    };
+                                    return next;
+                                  });
+                                }
+                              }
+                            }}
                             style={{
                               width: '100%',
                               height: 24,
@@ -707,6 +788,13 @@ const CheckDocumentModal = ({
                               outline: 'none'
                             }}
                           />
+                          {record.batches && (
+                            <datalist id={`batch-list-${record.rowId}`}>
+                              {record.batches.map(b => (
+                                <option key={b.id} value={b.batchCode} />
+                              ))}
+                            </datalist>
+                          )}
                         </td>
                         <td style={{ padding: '6px 4px' }}>
                           <input

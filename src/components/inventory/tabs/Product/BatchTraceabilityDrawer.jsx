@@ -13,7 +13,8 @@ import {
   DeleteOutlined,
   RollbackOutlined,
   BellOutlined,
-  BellFilled
+  BellFilled,
+  EditOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getBatchTraceability, toggleBatchNotificationMute } from '../../../../api/batchApi';
@@ -21,6 +22,7 @@ import { getImportById } from '../../../../api/documentApi';
 import { renderBatchStatusBadge, renderExpiryStatusBadge } from '../../utils/batchHelper';
 import DisposalDocumentModal from '../ExportDelete/DisposalDocumentModal';
 import ReturnDocumentModal from '../Import/ReturnDocumentModal';
+import BatchDateEditModal from './BatchDateEditModal';
 
 const showToast = (text, type = 'success') => {
   const toast = document.createElement('div');
@@ -53,6 +55,15 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [returnImportDoc, setReturnImportDoc] = useState(null);
   const [presetBatchForReturn, setPresetBatchForReturn] = useState(null);
+
+  // States quản lý Modal Cập nhật Ngày SX & HSD Lô
+  const [dateEditModalOpen, setDateEditModalOpen] = useState(false);
+  const [dateEditField, setDateEditField] = useState('expiryDate');
+
+  const handleOpenDateEdit = (field = 'expiryDate') => {
+    setDateEditField(field);
+    setDateEditModalOpen(true);
+  };
 
   const fetchTraceability = async (id) => {
     if (!id) return;
@@ -285,6 +296,45 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
         {label}
       </span>
     );
+  };
+
+  const getDocumentTab = (docCode = '', docType, allocType) => {
+    const code = (docCode || '').toUpperCase().trim();
+
+    // 1. Phân loại theo DocumentType
+    if (docType === 1 || docType === 'Import') return 'Import';
+    if (docType === 2 || docType === 'Return') return 'ImportReturn';
+    if (docType === 3 || docType === 'Sale') return 'Invoice';
+    if (docType === 4 || docType === 'CustomerReturn') return 'Invoice';
+    if (docType === 5 || docType === 'Transfer') return 'Transfer';
+    if (docType === 7 || docType === 8 || docType === 'Export' || docType === 'ExportDelete') return 'ExportDelete';
+    if (docType === 9 || docType === 'Production') return 'Production';
+    if (docType === 10 || docType === 'Check') return 'Check';
+    if (docType === 11 || docType === 'CostAdjustment') return 'Adjustment';
+
+    // 2. Phân loại theo AllocationType
+    if (allocType === 0 || allocType === 'ImportReceipt') return 'Import';
+    if (allocType === 1 || allocType === 'Sale') return 'Invoice';
+    if (allocType === 2 || allocType === 'TransferSend' || allocType === 3 || allocType === 'TransferReceive') return 'Transfer';
+    if (allocType === 4 || allocType === 'StockCheck') return 'Check';
+    if (allocType === 5 || allocType === 'Disposal') return 'ExportDelete';
+    if (allocType === 6 || allocType === 'SupplierReturn') return 'ImportReturn';
+    if (allocType === 7 || allocType === 'CustomerReturn') return 'Invoice';
+    if (allocType === 8 || allocType === 'CostAdjustment') return 'Adjustment';
+    if (allocType === 9 || allocType === 'ProductionReceipt' || allocType === 10 || allocType === 'ProductionConsumption') return 'Production';
+
+    // 3. Phân loại theo Tiền tố mã chứng từ (Code Prefix)
+    if (code.startsWith('NH') || code.startsWith('PNK')) return 'Import';
+    if (code.startsWith('THK')) return 'Invoice';
+    if (code.startsWith('TH') || code.startsWith('PTN')) return 'ImportReturn';
+    if (code.startsWith('BH') || code.startsWith('HD') || code.startsWith('DH') || code.startsWith('PXBH')) return 'Invoice';
+    if (code.startsWith('CK') || code.startsWith('PCH')) return 'Transfer';
+    if (code.startsWith('XH') || code.startsWith('PXH')) return 'ExportDelete';
+    if (code.startsWith('SX') || code.startsWith('LSX')) return 'Production';
+    if (code.startsWith('KK') || code.startsWith('PKK')) return 'Check';
+    if (code.startsWith('DC') || code.startsWith('DGV')) return 'Adjustment';
+
+    return 'Invoice';
   };
 
   return (
@@ -556,13 +606,53 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
                     <span style={{ color: '#64748b' }}>Ngày nhập kho:</span>{' '}
                     <strong>{currentBatch.receivedDate ? dayjs(currentBatch.receivedDate).format('DD/MM/YYYY') : '---'}</strong>
                   </div>
-                  <div>
-                    <span style={{ color: '#64748b' }}>Ngày sản xuất:</span>{' '}
-                    <strong>{currentBatch.manufactureDate ? dayjs(currentBatch.manufactureDate).format('DD/MM/YYYY') : '---'}</strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button
+                      type="button"
+                      title="Sửa ngày sản xuất Lô hàng"
+                      onClick={() => handleOpenDateEdit('manufactureDate')}
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: '#2563eb',
+                        cursor: 'pointer',
+                        padding: '2px 5px',
+                        borderRadius: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <EditOutlined style={{ fontSize: 11 }} />
+                    </button>
+                    <span>
+                      <span style={{ color: '#64748b' }}>Ngày sản xuất:</span>{' '}
+                      <strong>{currentBatch.manufactureDate ? dayjs(currentBatch.manufactureDate).format('DD/MM/YYYY') : '---'}</strong>
+                    </span>
                   </div>
-                  <div>
-                    <span style={{ color: '#64748b' }}>Hạn sử dụng:</span>{' '}
-                    <strong>{currentBatch.expiryDate ? dayjs(currentBatch.expiryDate).format('DD/MM/YYYY') : 'Không có'}</strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button
+                      type="button"
+                      title="Sửa hạn sử dụng Lô hàng"
+                      onClick={() => handleOpenDateEdit('expiryDate')}
+                      style={{
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                        color: '#2563eb',
+                        cursor: 'pointer',
+                        padding: '2px 5px',
+                        borderRadius: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <EditOutlined style={{ fontSize: 11 }} />
+                    </button>
+                    <span>
+                      <span style={{ color: '#64748b' }}>Hạn sử dụng:</span>{' '}
+                      <strong>{currentBatch.expiryDate ? dayjs(currentBatch.expiryDate).format('DD/MM/YYYY') : 'Không có'}</strong>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -636,7 +726,26 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
                             a.allocationType === 9 ||
                             a.allocationType === 'ProductionReceipt' ||
                             (a.allocationTypeName && (a.allocationTypeName.includes('chuẩn bị') || a.allocationTypeName.includes('Sản xuất chuẩn bị sẵn') || a.allocationTypeName.includes('Nhập hàng')));
-                          const isNegative = !isReceipt && a.quantityAllocated > 0;
+                          
+                          const isCheck = a.allocationType === 4 || 
+                            a.allocationType === 'StockCheck' || 
+                            (a.allocationTypeName || '').toLowerCase().includes('kiểm');
+
+                          const val = Number(a.quantityAllocated);
+                          let displayStr = '';
+                          let color = '';
+
+                          if (isReceipt) {
+                            displayStr = val > 0 ? `+${val.toLocaleString('vi-VN')}` : val.toLocaleString('vi-VN');
+                            color = '#059669';
+                          } else if (isCheck) {
+                            displayStr = val > 0 ? `+${val.toLocaleString('vi-VN')}` : val.toLocaleString('vi-VN');
+                            color = val > 0 ? '#059669' : '#dc2626';
+                          } else {
+                            displayStr = val > 0 ? `-${val.toLocaleString('vi-VN')}` : val.toLocaleString('vi-VN');
+                            color = '#dc2626';
+                          }
+
                           return (
                             <tr key={a.id || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                               <td style={{ padding: '8px 10px', color: '#475569' }}>
@@ -646,17 +755,31 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
                                 {renderAllocationTypeBadge(a)}
                               </td>
                               <td style={{ padding: '8px 10px', fontWeight: 600, color: '#2563eb' }}>
-                                {a.documentCode ? <a href={`/inventory-management?tab=Invoice&search=${a.documentCode}`} target="_blank">{a.documentCode}</a> : '---'}
+                                {a.documentCode ? (
+                                  <a
+                                    href={`/inventory-management?tab=${getDocumentTab(a.documentCode, a.documentType, a.allocationType)}&search=${encodeURIComponent(a.documentCode)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={`Mở chi tiết chứng từ ${a.documentCode}`}
+                                    style={{ color: '#2563eb', textDecoration: 'none' }}
+                                    onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
+                                    onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
+                                  >
+                                    {a.documentCode}
+                                  </a>
+                                ) : (
+                                  '---'
+                                )}
                               </td>
                               <td
                                 style={{
                                   padding: '8px 10px',
                                   textAlign: 'right',
                                   fontWeight: 700,
-                                  color: isReceipt ? '#059669' : (isNegative ? '#dc2626' : '#059669')
+                                  color: color
                                 }}
                               >
-                                {isReceipt ? `+${Number(a.quantityAllocated).toLocaleString('vi-VN')}` : (isNegative ? `-${Number(a.quantityAllocated).toLocaleString('vi-VN')}` : `+${Number(a.quantityAllocated).toLocaleString('vi-VN')}`)}
+                                {displayStr}
                               </td>
                               <td style={{ padding: '8px 10px', textAlign: 'right', color: '#475569' }}>
                                 {Number(a.unitCost).toLocaleString('vi-VN')} đ
@@ -717,6 +840,18 @@ const BatchTraceabilityDrawer = ({ open, batchId, onClose, onActionSuccess }) =>
           }}
         />
       )}
+
+      {/* MODAL CẬP NHẬT NGÀY SX & HSD LÔ HÀNG */}
+      <BatchDateEditModal
+        open={dateEditModalOpen}
+        batch={currentBatch}
+        initialFocusField={dateEditField}
+        onClose={() => setDateEditModalOpen(false)}
+        onSuccess={() => {
+          fetchTraceability(batchId);
+          onActionSuccess?.();
+        }}
+      />
     </div>
   );
 };
